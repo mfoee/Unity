@@ -1,0 +1,13 @@
+G:\7. Programming\2D UFO\Temp\UnityVS_bin\Debug\Assembly-CSharp.dll
+G:\7. Programming\2D UFO\Temp\UnityVS_bin\Debug\Assembly-CSharp.pdb
+G:\7. Programming\2D UFO\Temp\UnityVS_bin\Debug\UnityEditor.dll
+G:\7. Programming\2D UFO\Temp\UnityVS_bin\Debug\UnityEngine.dll
+G:\7. Programming\2D UFO\Temp\UnityVS_bin\Debug\UnityEngine.Networking.dll
+G:\7. Programming\2D UFO\Temp\UnityVS_bin\Debug\UnityEngine.UI.dll
+G:\7. Programming\2D UFO\Temp\UnityVS_bin\Debug\UnityEngine.xml
+G:\7. Programming\2D UFO\Temp\UnityVS_bin\Debug\UnityEngine.UI.xml
+G:\7. Programming\2D UFO\Temp\UnityVS_bin\Debug\UnityEngine.Networking.xml
+G:\7. Programming\2D UFO\Temp\UnityVS_bin\Debug\UnityEditor.xml
+G:\7. Programming\2D UFO\Temp\UnityVS_obj\Debug\2D UFO.CSharp.csprojResolveAssemblyReference.cache
+G:\7. Programming\2D UFO\Temp\UnityVS_obj\Debug\Assembly-CSharp.dll
+G:\7. Programming\2D UFO\Temp\UnityVS_obj\Debug\Assembly-CSharp.pdb
