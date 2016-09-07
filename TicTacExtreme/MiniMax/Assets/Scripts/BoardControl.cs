@@ -5,6 +5,7 @@ public class BoardControl : MonoBehaviour
 {
 
     public int[,] MainArray = new int[3, 3];
+    public int[,] aiArray = new int[3, 3];
     public KeyCode vKey;
     char entered, pressed;
     public bool wait;
@@ -17,12 +18,15 @@ public class BoardControl : MonoBehaviour
     public int playerChk;
     public int sideChk;
 
+    private int user, simWin;
+
     Transform selected;
     Renderer[] renderers;
 
     // Use this for initialization
     void Start() {
         MainArray = new int[3, 3] { { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } };
+        aiArray = new int[3, 3] { { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } };
 
         //foreach (int element in MainArray) {
         //    //print(element); -- Debug line
@@ -40,12 +44,7 @@ public class BoardControl : MonoBehaviour
         //selected = transform.FindChild("TL"); -- Debug Line
     }
 
-    void input() {
 
-    }
-    void display() {
-
-    }
     void selectPlayer()
     {
         /**
@@ -124,10 +123,12 @@ public class BoardControl : MonoBehaviour
     {
         if (subject>0)
         {
+            Debug.Log("subject: " + subject);
             return subject;
         }
         else
         {
+            Debug.Log("subject: -" + subject);
             return -subject;
         }
     }
@@ -140,6 +141,13 @@ public class BoardControl : MonoBehaviour
             MainArray[0, 0] = swapTo;
             rendererTextureChange(toSwap, swapTo);
             turn = abs(3 - swapTo);
+
+            //Testing
+            //Debug.Log("TM MainArray: " + getMainArray("TM"));
+            //if (0 == getMainArray("TM")) {
+            //    textureSwap("TM",turn);
+            //}
+            
         }
          else if (toSwap == "TM"&& MainArray[0, 1] == 0)
         {
@@ -190,51 +198,10 @@ public class BoardControl : MonoBehaviour
             turn = abs(3 - swapTo);
         }
 
-
     }
 
     public void winCheck()
     {
-        //if (winner != 0)
-        //{
-        //    return;
-        //}
-        //else
-        //{
-        //    //Debug.Log("inside winCheck of BoardControl of " + boardPositionInMain);
-        //    if (MainArray[0, 0] == MainArray[0, 1] && MainArray[0, 0] == MainArray[0, 2])
-        //    {
-        //        winner = MainArray[0, 0];
-        //    }
-        //    else if (MainArray[1, 0] == MainArray[1, 1] && MainArray[1, 0] == MainArray[1, 2])
-        //    {
-        //        winner = MainArray[1, 0];
-        //    }
-        //    else if (MainArray[2, 0] == MainArray[2, 1] && MainArray[2, 0] == MainArray[2, 2])
-        //    {
-        //        winner = MainArray[2, 0];
-        //    }
-        //    else if (MainArray[0, 0] == MainArray[1, 0] && MainArray[0, 0] == MainArray[2, 0])
-        //    {
-        //        winner = MainArray[0, 0];
-        //    }
-        //    else if (MainArray[0, 1] == MainArray[1, 1] && MainArray[0, 1] == MainArray[2, 1])
-        //    {
-        //        winner = MainArray[0, 1];
-        //    }
-        //    else if (MainArray[0, 2] == MainArray[1, 2] && MainArray[0, 2] == MainArray[2, 2])
-        //    {
-        //        winner = MainArray[0, 2];
-        //    }
-        //    else if (MainArray[0, 0] == MainArray[1, 1] && MainArray[0, 0] == MainArray[2, 2])
-        //    {
-        //        winner = MainArray[0, 0];
-        //    }
-        //    else if (MainArray[0, 2] == MainArray[1, 1] && MainArray[0, 2] == MainArray[2, 0])
-        //    {
-        //        winner = MainArray[2, 0];
-        //    }
-        //}
 
         //Check Row
         for(int i=0; i<3; i++) {
@@ -278,32 +245,134 @@ public class BoardControl : MonoBehaviour
 
     public int getMainArray(string posTextSelect) {
 
-        if(posTextSelect == "TL") {
-            return MainArray[0, 0];
-        }else if(posTextSelect == "TM") {
-            return MainArray[0, 1];
-        }else if (posTextSelect == "TR") {
-            return MainArray[0, 2];
-        } else if (posTextSelect == "ML") {
-            return MainArray[1, 0];
-        } else if (posTextSelect == "MM") {
-            return MainArray[1, 1];
-        } else if (posTextSelect == "MR") {
-            return MainArray[1, 2];
-        } else if (posTextSelect == "BL") {
-            return MainArray[2, 0];
-        } else if (posTextSelect == "BM") {
-            return MainArray[2, 1];
-        } else if (posTextSelect == "BR") {
-            return MainArray[2, 2];
+        switch (posTextSelect) {
+            case "TL":
+                return MainArray[0, 0];
+            case "TM":
+                return MainArray[0, 1];
+            case "TR":
+                return MainArray[0, 2];
+            case "ML":
+                return MainArray[1, 0];
+            case "MM":
+                return MainArray[1, 1];
+            case "MR":
+                return MainArray[1, 2];
+            case "BL":
+                return MainArray[2, 0];
+            case "BM":
+                return MainArray[2, 1];
+            case "BR":
+                return MainArray[2, 2];
+            default:
+                return 0;
+        }
+    }
+
+    public string getPosition(int x, int y) {
+        if (0 == x && 0 == y) {
+            return "TL";
+        } else if (0 == x && 1 == y) {
+            return "TM";
+        } else if (0 == x && 2 == y) {
+            return "TR";
+        } else if (1 == x && 0 == y) {
+            return "ML";
+        } else if (1 == x && 1 == y) {
+            return "MM";
+        } else if (1 == x && 2 == y) {
+            return "MR";
+        } else if (2 == x && 0 == y) {
+            return "BL";
+        } else if (2 == x && 1 == y) {
+            return "BM";
+        } else if (2 == x && 2 == y) {
+            return "BR";
         } else {
-            return 0;
+            return "";
+        }
+    }
+
+    public void MiniMax(int turn) {
+        
+        //Debug.Log("turn: " + turn);
+        if (1 == turn) {
+            //Debug.Log("mainPlayer is X");
+            user = 2;
+        } else {
+            //Debug.Log("mainPlayer is 0");
+            user = 1;
+        }
+
+        int temp;
+
+        aiArray = MainArray;
+        for(int j=0; j<3; j++) {
+            for(int k=0; k<3; k++) {
+                //Debug.Log("AI Array: " + aiArray[j, k] + " user: " + user);
+                if(0 == aiArray[j, k]) {
+                    aiArray[j, k] = user;
+                    Debug.Log("simWinCheck return value: " + simWinCheck(j, k));
+                    temp = simWinCheck(j, k);
+                    aiArray[j, k] = 0;
+                    Debug.Log("simWinCheck: " + temp + " j: " + j + " k: " + k);
+                    if (temp != 100) {
+                        Debug.Log("getPosition: " + getPosition(j, k));
+                        textureSwap(getPosition(j,k), turn);
+                        return;
+                    } else {
+
+                    }
+
+                }
+            }
+        }
+        //for(int i=0; i<9; i++) {
+        //    //Debug.Log("MainArray" + i + ": " + getMainArray2(i));
+        //}
+        //textureSwap("TM", turn);
+
+    }
+
+    public int simWinCheck(int x, int y) {
+        simWin = 0;
+        //Check Row
+        for (int i = 0; i < 3; i++) {
+            //Debug.Log("i=" + i + "; aiArray[0," + i + "]=" + aiArray[0, i]);
+            if (aiArray[i, 0] != 0 && aiArray[i, 0] == aiArray[i, 1] && aiArray[i, 0] == aiArray[i, 2]) {
+                Debug.Log("Winner Row");
+                simWin = 1;
+            }
+            //Check Diagonal
+            if (aiArray[0, 0] != 0 && aiArray[0, 0] == aiArray[1, 1] && aiArray[0, 0] == aiArray[2, 2]) {
+                //Debug.Log("Winner Diagonal");
+                simWin = 2;
+            }
+        }
+
+        //Check Column
+        for (int j = 0; j < 3; j++) {
+            //Debug.Log("j=" + j + "; aiArray[" + j + ",0]=" + aiArray[j, 0]);
+            if (aiArray[0, j] != 0 && aiArray[0, j] == aiArray[1, j] && aiArray[0, j] == aiArray[2, j]) {
+                Debug.Log("Winner Column");
+                simWin = 3;
+            }
+            //Check Anti-Diagonal
+            if (aiArray[0, 2] != 0 && aiArray[2, 0] == aiArray[1, 1] && aiArray[2, 0] == aiArray[0, 2]) {
+                Debug.Log("Winner Anti-Diagonal");
+                simWin = 4;
+            }
+        }
+        if (0 != simWin) {
+            return simWin;
+        }else {
+            return 100;
         }
     }
 
     //AI optimized for a single board using the Minimax algorithm
 
-    public int AIMinimax(int[,] simArray, int player)
+    public void AIMinimax(int[,] simArray, int player)
     {
         int[,] simulatedArray = simArray;
         for (int i = 0; i < 3; i++)
@@ -377,12 +446,15 @@ public class BoardControl : MonoBehaviour
                 if (Physics.Raycast(ray, out hit))
                 {
                     textSelect = hit.collider.name;
-                    //print("texture name: " + textSelect); ---- Debug line
+                    Debug.Log("texture name: " + textSelect); //---- Debug line
                 }
-                if ("Side" != textSelect)
+                if ("Side" != textSelect && "Plane" != textSelect)
                 {
                     textureSwap(textSelect, turn);
                     winCheck();
+                    //if AI, then AI move
+                    MiniMax(turn);
+
                 }
 
             }
