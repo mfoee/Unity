@@ -6,6 +6,11 @@ public class PlayerController : MonoBehaviour {
     private Rigidbody2D rb2d;
 
     public float speed;
+    public GameObject shot;
+    public Transform shotSpawn;
+
+    public float fireRate;
+    private float nextFire;
 
 	// Use this for initialization
 	void Start () {
@@ -22,4 +27,13 @@ public class PlayerController : MonoBehaviour {
 
         rb2d.AddForce(movement * speed);
 	}
+
+    void Update() {
+        
+        if (Input.GetKey(KeyCode.Space) && Time.time > nextFire) {
+            //Debug.Log("fire");
+            nextFire = Time.time + fireRate;
+            Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
+        }
+    }
 }
