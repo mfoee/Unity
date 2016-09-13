@@ -10,7 +10,7 @@ public class BoardControl : MonoBehaviour
     char entered, pressed;
     public bool wait;
     public int turn, currentTexture, winner;
-    public char player1, player2;
+    public int player1, player2;
     public Texture[] textures;
     public string textSelect;
     public string boardPositionInMain;
@@ -34,8 +34,8 @@ public class BoardControl : MonoBehaviour
 
         //Initialization
         turn = 0;
-        player1 = '\0';
-        player2 = '\0';
+        player1 = 0;
+        player2 = 0;
         currentTexture = 0;
         renderers = transform.GetComponentsInChildren<Renderer>();
         winner = 0;
@@ -80,13 +80,13 @@ public class BoardControl : MonoBehaviour
             print("Player " + mainPlayer + ", you are X.");
             if (1 == mainPlayer)
             {
-                player1 = 'x';
-                player2 = 'o';
+                player1 = 2; //-- 'x';
+                player2 = 1; //-- 'o';
             }
             else if (2 == mainPlayer)
             {
-                player2 = 'x';
-                player1 = 'o';
+                player2 = 2; //-- 'x';
+                player1 = 1; //-- 'o';
             }
             turn = 2;
             sideChk = 1;
@@ -96,13 +96,13 @@ public class BoardControl : MonoBehaviour
             print("Player " + mainPlayer + ", you are O.");
             if (1 == mainPlayer)
             {
-                player1 = 'o';
-                player2 = 'x';
+                player1 = 1; //--'o';
+                player2 = 2; //-- 'x';
             }
             else if (2 == mainPlayer)
             {
-                player2 = 'o';
-                player1 = 'x';
+                player2 = 1; //-- 'o';
+                player1 = 2; //-- 'x';
             }
             turn = 1;
             sideChk = 1;
@@ -123,12 +123,12 @@ public class BoardControl : MonoBehaviour
     {
         if (subject>0)
         {
-            Debug.Log("subject: " + subject);
+            //Debug.Log("subject: " + subject);
             return subject;
         }
         else
         {
-            Debug.Log("subject: -" + subject);
+            //Debug.Log("subject: -" + subject);
             return -subject;
         }
     }
@@ -293,135 +293,133 @@ public class BoardControl : MonoBehaviour
         }
     }
 
-    public void MiniMax(int turn) {
-        
-        //Debug.Log("turn: " + turn);
-        if (1 == turn) {
-            //Debug.Log("mainPlayer is X");
-            user = 2;
-        } else {
-            //Debug.Log("mainPlayer is 0");
-            user = 1;
-        }
-
-        int temp;
-
-        aiArray = MainArray;
-        for(int j=0; j<3; j++) {
-            for(int k=0; k<3; k++) {
-                //Debug.Log("AI Array: " + aiArray[j, k] + " user: " + user);
-                if(0 == aiArray[j, k]) {
-                    aiArray[j, k] = user;
-                    Debug.Log("simWinCheck return value: " + simWinCheck(j, k));
-                    temp = simWinCheck(j, k);
-                    aiArray[j, k] = 0;
-                    Debug.Log("simWinCheck: " + temp + " j: " + j + " k: " + k);
-                    if (temp != 100) {
-                        Debug.Log("getPosition: " + getPosition(j, k));
-                        textureSwap(getPosition(j,k), turn);
-                        return;
-                    } else {
-
-                    }
-
-                }
-            }
-        }
-        //for(int i=0; i<9; i++) {
-        //    //Debug.Log("MainArray" + i + ": " + getMainArray2(i));
-        //}
-        //textureSwap("TM", turn);
-
-    }
-
-    public int simWinCheck(int x, int y) {
-        simWin = 0;
-        //Check Row
-        for (int i = 0; i < 3; i++) {
-            //Debug.Log("i=" + i + "; aiArray[0," + i + "]=" + aiArray[0, i]);
-            if (aiArray[i, 0] != 0 && aiArray[i, 0] == aiArray[i, 1] && aiArray[i, 0] == aiArray[i, 2]) {
-                Debug.Log("Winner Row");
-                simWin = 1;
-            }
-            //Check Diagonal
-            if (aiArray[0, 0] != 0 && aiArray[0, 0] == aiArray[1, 1] && aiArray[0, 0] == aiArray[2, 2]) {
-                //Debug.Log("Winner Diagonal");
-                simWin = 2;
-            }
-        }
-
-        //Check Column
-        for (int j = 0; j < 3; j++) {
-            //Debug.Log("j=" + j + "; aiArray[" + j + ",0]=" + aiArray[j, 0]);
-            if (aiArray[0, j] != 0 && aiArray[0, j] == aiArray[1, j] && aiArray[0, j] == aiArray[2, j]) {
-                Debug.Log("Winner Column");
-                simWin = 3;
-            }
-            //Check Anti-Diagonal
-            if (aiArray[0, 2] != 0 && aiArray[2, 0] == aiArray[1, 1] && aiArray[2, 0] == aiArray[0, 2]) {
-                Debug.Log("Winner Anti-Diagonal");
-                simWin = 4;
-            }
-        }
-        if (0 != simWin) {
-            return simWin;
-        }else {
-            return 100;
-        }
-    }
-
     //AI optimized for a single board using the Minimax algorithm
 
     public void AIMinimax(int[,] simArray, int player)
     {
         int[,] simulatedArray = simArray;
-        for (int i = 0; i < 3; i++)
-        {
-            for (int j = 0; j < 3; j++)
-            {
-                if (simulatedArray [i,j] ==0)
-                {
-                    AIMinimax(simulatedArray, abs(3 - player));
-                }
-            }
+
+        //Preferred moves in the order of left to right: 
+        //{1,1}, {0,0}, {0,2}, {2,0}, {2,2}, {0,1}, {1,0}, {1,2}, {2,1};
+
+        if (simArray[1, 1] == 0) {
+            textureSwap("MM", player);
+        }else if(simArray[0,0]== 0) {
+            textureSwap("TL", player);
+        } else if (simArray[0, 2] == 0) {
+            textureSwap("TR", player);
+        } else if (simArray[2, 0] == 0) {
+            textureSwap("BL", player);
+        } else if (simArray[2, 2] == 0) {
+            textureSwap("BR", player);
+        } else if (simArray[0, 1] == 0) {
+            textureSwap("TM", player);
+        } else if (simArray[1, 0] == 0) {
+            textureSwap("ML", player);
+        } else if (simArray[1, 2] == 0) {
+            textureSwap("MR", player);
+        } else if (simArray[2, 1] == 0) {
+            textureSwap("BM", player);
         }
+
+        //for (int i = 0; i < 3; i++)
+        //{
+        //    for (int j = 0; j < 3; j++)
+        //    {
+        //        //if (0 == simulatedArray[i,j]){
+        //        //    simulatedArray[i, j] = player;
+        //        //    AIMinimax(simulatedArray, abs(3 - player));
+        //        //}
+        //        //Debug.Log("turn: " + player + ", simulatedArray[" + i + "], [" + j + "]: " + simulatedArray[i, j]);
+        //    }
+        //}
+
+        //for (int i = 0; i < 3; i++) {
+        //    for (int j = 0; j < 3; j++) {
+        //        if (0 == simulatedArray[i, j]) {
+        //            //Debug.Log("next---------------------------------");
+        //            simulatedArray[i, j] = player;
+        //            AIMinimax(simulatedArray, abs(3 - player));
+        //        }
+
+        //        if(0 != simulatedWincheck(simulatedArray, player)) {
+        //            //Debug.Log("-------WinCheck: " + simulatedWincheck(simulatedArray, player));
+        //            return;
+        //        }
+        //    }
+        //}
     }
 
-    public int sumulatedWincheck(int[,] simArray, int player)
+    public int simulatedWincheck(int[,] simArray, int player)
     {
-        for (int i = 0; i < 3; i++)
-        {
-            //Debug.Log("i=" + i + "; MainArray[0," + i + "]=" + MainArray[0, i]);
-            if (simArray[i, 0] != 0 && simArray[i, 0] == simArray[i, 1] && simArray[i, 0] == simArray[i, 2])
-            {
-                //Debug.Log("Winner Row");
-                winner = simArray[i, 0];
+        
+        int count0 = 0, count1 = 0, count2 = 0;
+        int count3 = 0, count4 = 0, count5 = 0;
+        int count6 = 0, count7 = 0;
+
+        Debug.Log("Player: " + player);
+
+        //Heuristic Score check:
+        //Horiziontal - Row
+        for(int i=0; i<3; i++) {
+            for(int j=0; j<3; j++) {
+                if(0 == i && simArray[0,j] == 2) {
+                    count0 -= 10;
+                }else if(0 == i && simArray[0,j] == 1) {
+                    count0 += 10;
+                }
+                if (1 == i && simArray[1, j] == 2) {
+                    count1 -= 10;
+                } else if (1 == i && simArray[1, j] == 1) {
+                    count1 += 10;
+                }
+                if (2 == i && simArray[2, j] == 2) {
+                    count2 -= 10;
+                } else if (2 == i && simArray[2, j] == 1) {
+                    count2 += 10;
+                }
             }
-            //Check Diagonal
-            if (simArray[i, 0] != 0 && simArray[0, 0] == simArray[1, 1] && simArray[0, 0] == simArray[2, 2])
-            {
-                //Debug.Log("Winner Diagonal");
-                winner = simArray[0, 0];
+
+            //Check diagonal
+            if (2 == simArray[i, i]) {
+                count6 -= 10;
+            } else if(1 == simArray[i,i]){
+                count6 += 10;
             }
         }
 
-        //Check Column
-        for (int j = 0; j < 3; j++)
-        {
-            //Debug.Log("j=" + j + "; MainArray[" + j + ",0]=" + MainArray[j, 0]);
-            if (simArray[0, j] != 0 && simArray[0, j] == simArray[1, j] && simArray[0, j] == simArray[2, j])
-            {
-                //Debug.Log("Winner Column");
-                winner = simArray[0, j];
+        //Vertical - Column
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (0 == i && simArray[j, 0] == 2) {
+                    count3 -= 10;
+                } else if (0 == i && simArray[j, 0] == 1) {
+                    count3 += 10;
+                }
+                if (1 == i && simArray[j, 1] == 2) {
+                    count4 -= 10;
+                } else if (1 == i && simArray[j, 1] == 1) {
+                    count4 += 10;
+                }
+                if (2 == i && simArray[j, 2] == 2) {
+                    count5 -= 10;
+                } else if (2 == i && simArray[j, 2] == 1) {
+                    count5 += 10;
+                }
             }
-            //Check Anti-Diagonal
-            if (simArray[0, j] != 0 && simArray[2, 0] == simArray[1, 1] && simArray[2, 0] == simArray[0, 2])
-            {
-                //Debug.Log("Winner Anti-Diagonal");
-                winner = simArray[2, 0];
+
+            //Check anti-diagonal
+            if (2 == simArray[i, 2 - i]) {
+                count7 -= 10;
+            }else if(1 == simArray[i, 2 - i]) {
+                count7 += 10;
             }
         }
-        return winner;
+
+        Debug.Log("|" + count0 + "|" + count1 + "|" + count2);
+        Debug.Log("|" + count3 + "|" + count4 + "|" + count5);
+        Debug.Log("|" + count6 + "|" + count7);
+        return 0;
     }
 
 
@@ -446,14 +444,16 @@ public class BoardControl : MonoBehaviour
                 if (Physics.Raycast(ray, out hit))
                 {
                     textSelect = hit.collider.name;
-                    Debug.Log("texture name: " + textSelect); //---- Debug line
+                    //Debug.Log("texture name: " + textSelect); //---- Debug line
                 }
                 if ("Side" != textSelect && "Plane" != textSelect)
                 {
                     textureSwap(textSelect, turn);
-                    winCheck();
+                    //winCheck();
                     //if AI, then AI move
-                    MiniMax(turn);
+                    //MiniMax(turn);
+                    AIMinimax(MainArray, turn);
+                    //simulatedWincheck(MainArray, turn);
 
                 }
 
