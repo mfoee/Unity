@@ -149,13 +149,13 @@ public class BoardControl : MonoBehaviour
             //}
             
         }
-         else if (toSwap == "TM"&& MainArray[0, 1] == 0)
+         else if (toSwap == "TM" && MainArray[0, 1] == 0)
         {
             MainArray[0, 1] = swapTo;
             rendererTextureChange(toSwap, swapTo);
             turn = abs(3 - swapTo);
         }
-        else if (toSwap == "TR"&& MainArray[0, 2] == 0)
+        else if (toSwap == "TR" && MainArray[0, 2] == 0)
         {
             MainArray[0, 2] = swapTo;
             rendererTextureChange(toSwap, swapTo);
@@ -295,121 +295,432 @@ public class BoardControl : MonoBehaviour
 
     //AI optimized for a single board using the Minimax algorithm
 
-    public void AIMinimax(int[,] simArray, int player)
-    {
-        int[,] simulatedArray = simArray;
+    public void AIMinimax(int[,] simArray, int player, int depth) {
+        int score = 0;
+        string empty = "empty: ";
 
-        //Preferred moves in the order of left to right: 
-        //{1,1}, {0,0}, {0,2}, {2,0}, {2,2}, {0,1}, {1,0}, {1,2}, {2,1};
-
-        if (simArray[1, 1] == 0) {
-            textureSwap("MM", player);
-        }else if(simArray[0,0]== 0) {
-            textureSwap("TL", player);
-        } else if (simArray[0, 2] == 0) {
-            textureSwap("TR", player);
-        } else if (simArray[2, 0] == 0) {
-            textureSwap("BL", player);
-        } else if (simArray[2, 2] == 0) {
-            textureSwap("BR", player);
-        } else if (simArray[0, 1] == 0) {
-            textureSwap("TM", player);
-        } else if (simArray[1, 0] == 0) {
-            textureSwap("ML", player);
-        } else if (simArray[1, 2] == 0) {
-            textureSwap("MR", player);
-        } else if (simArray[2, 1] == 0) {
-            textureSwap("BM", player);
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (0 == simArray[i, j]) {
+                    empty += "[" + i + ", " + j + "] ";
+                }
+            }
         }
+        Debug.Log(empty + "\nPlayer: " + player + "\nDepth: " + depth);
+
+        //See if the center is blank
+        if(simArray[1,1] == 0) {
+            textureSwap(getPosition(1,1), player);
+        }else {
+            //--------------------------------------------------------------------------
+            //Rule 1: If there's a winning move, take it
+            //Horizontal
+            for (int i = 0; i < 3; i++) {
+                if (simArray[i, 0] == 1 && simArray[i, 1] == 1 && simArray[i, 2] == 0) {
+                    textureSwap(getPosition(i, 2), player);
+                    return;
+                }
+                if (simArray[i, 0] == 1 && simArray[i, 1] == 0 && simArray[i, 2] == 1) {
+                    textureSwap(getPosition(i, 1), player);
+                    return;
+                }
+                if (simArray[i, 0] == 0 && simArray[i, 1] == 1 && simArray[i, 2] == 1) {
+                    textureSwap(getPosition(i, 0), player);
+                    return;
+                }
+            }
+            //Vertical
+            for (int i = 0; i < 3; i++) {
+                if (simArray[0, i] == 1 && simArray[1, i] == 1 && simArray[2, i] == 0) {
+                    textureSwap(getPosition(2, i), player);
+                    return;
+                }
+                if (simArray[0, i] == 1 && simArray[1, i] == 0 && simArray[2, i] == 1) {
+                    textureSwap(getPosition(1, i), player);
+                    return;
+                }
+                if (simArray[0, i] == 0 && simArray[1, i] == 1 && simArray[2, i] == 1) {
+                    textureSwap(getPosition(0, i), player);
+                    return;
+                }
+            }
+
+            //Diagonal
+            if (simArray[0, 0] == 1 && simArray[1, 1] == 1 && simArray[2, 2] == 0) {
+                textureSwap(getPosition(2, 2), player);
+                return;
+            }
+            if (simArray[0, 0] == 1 && simArray[1, 1] == 0 && simArray[2, 2] == 1) {
+                textureSwap(getPosition(1, 1), player);
+                return;
+            }
+            if (simArray[0, 0] == 0 && simArray[1, 1] == 1 && simArray[2, 2] == 1) {
+                textureSwap(getPosition(0, 0), player);
+                return;
+            }
+
+            //Anti-Diagonal
+            if (simArray[2, 0] == 1 && simArray[1, 1] == 1 && simArray[0, 2] == 0) {
+                textureSwap(getPosition(0, 2), player);
+                return;
+            }
+            if (simArray[2, 0] == 1 && simArray[1, 1] == 0 && simArray[0, 2] == 1) {
+                textureSwap(getPosition(1, 1), player);
+                return;
+            }
+            if (simArray[2, 0] == 0 && simArray[1, 1] == 1 && simArray[0, 2] == 1) {
+                textureSwap(getPosition(2, 0), player);
+                return;
+            }
+
+            //--------------------------------------------------------------------------
+            //Rule 2: If opponent has a winning move, block it
+            //Horizontal
+            for (int i = 0; i < 3; i++) {
+                if (simArray[i, 0] == 2 && simArray[i, 1] == 2 && simArray[i, 2] == 0) {
+                    textureSwap(getPosition(i, 2), player);
+                    return;
+                }
+                if (simArray[i, 0] == 2 && simArray[i, 1] == 0 && simArray[i, 2] == 2) {
+                    textureSwap(getPosition(i, 1), player);
+                    return;
+                }
+                if (simArray[i, 0] == 0 && simArray[i, 1] == 2 && simArray[i, 2] == 2) {
+                    textureSwap(getPosition(i, 0), player);
+                    return;
+                }
+            }
+            //Vertical
+            for (int i = 0; i < 3; i++) {
+                if (simArray[0, i] == 2 && simArray[1, i] == 2 && simArray[2, i] == 0) {
+                    textureSwap(getPosition(2, i), player);
+                    return;
+                }
+                if (simArray[0, i] == 2 && simArray[1, i] == 0 && simArray[2, i] == 2) {
+                    textureSwap(getPosition(1, i), player);
+                    return;
+                }
+                if (simArray[0, i] == 0 && simArray[1, i] == 2 && simArray[2, i] == 2) {
+                    textureSwap(getPosition(0, i), player);
+                    return;
+                }
+            }
+
+            //Diagonal
+            if (simArray[0, 0] == 2 && simArray[1, 1] == 2 && simArray[2, 2] == 0) {
+                textureSwap(getPosition(2, 2), player);
+                return;
+            }
+            if (simArray[0, 0] == 2 && simArray[1, 1] == 0 && simArray[2, 2] == 2) {
+                textureSwap(getPosition(1, 1), player);
+                return;
+            }
+            if (simArray[0, 0] == 0 && simArray[1, 1] == 2 && simArray[2, 2] == 2) {
+                textureSwap(getPosition(0, 0), player);
+                return;
+            }
+
+            //Anti-Diagonal
+            if (simArray[2, 0] == 2 && simArray[1, 1] == 2 && simArray[0, 2] == 0) {
+                textureSwap(getPosition(0, 2), player);
+                return;
+            }
+            if (simArray[2, 0] == 2 && simArray[1, 1] == 0 && simArray[0, 2] == 2) {
+                textureSwap(getPosition(1, 1), player);
+                return;
+            }
+            if (simArray[2, 0] == 0 && simArray[1, 1] == 2 && simArray[0, 2] == 2) {
+                textureSwap(getPosition(2, 0), player);
+                return;
+            }
+
+
+            //--------------------------------------------------------------------------
+            //Rule 3: If you can create a fork, do so (i.e. multiple winning moves)
+            int x = 0, y = 0;
+            int temp = 0;
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    if (simArray[i, j] == 0) {
+                        simArray[i, j] = player;
+                        temp = boardEvaluation(simArray, player);
+                        if (score < temp) {
+                            score = temp;
+                            x = i; y = j;
+                        }
+                        Debug.Log("Player: " + player + " @ [" + i + ", " + j + "] w/ Score: " + score);
+                        simArray[i, j] = 0;
+                    }
+                }
+            }
+            textureSwap(getPosition(x, y), player);
+        }
+        
+
+
+        //for (int i = 0; i < 3; i++) {
+        //    for (int j = 0; j < 3; j++) {
+        //        if (4 > depth && 0 == simArray[i, j]) {
+        //            //Debug.Log("Empty @["+i+", "+j+"], need to board check");
+        //            simArray[i, j] = player;
+        //            score = boardEvaluation(simArray, player);
+        //            Debug.Log("Player: " + player + " @ [" + i + ", " + j + "] w/ Score: " + score);
+
+        //            depth++;
+        //            //Debug.Log("EndOf---------------------------------------");
+        //            if (4 > depth && 1 == player) {
+        //                AIMinimax(simArray, 2, depth);
+        //                return;
+        //            } else if(4 > depth && 2 == player){
+        //                AIMinimax(simArray, 1, depth);
+        //                return;
+        //            }
+
+        //            //simArray[i, j] = 0;
+
+        //        }else if(4 <= depth) {
+        //            Debug.Log("return");
+        //            return;
+        //        }
+        //    }
+        //}
+        //Debug.Log("EndOfAI---------------------------------------");
     }
 
-    public void simulatedWincheck(int[,] simArray, int player)
-    {
+    public int boardEvaluation(int[,] board, int player) {
+        //This function is to evaluate the board and provide a score
 
         int[] count = { 0, 0, 0, 0, 0, 0, 0, 0 };
-
-        //Debug.Log("Player: " + player);
+        int[] countX = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        int[] countO = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        int sum = 0;
 
         //Heuristic Score check:
         //Horiziontal - Row
-        for(int i=0; i<3; i++) {
-            for(int j=0; j<3; j++) {
-                if(0 == i && simArray[0,j] == 2) {
-                    count[i] -= 10;
-                }else if(0 == i && simArray[0,j] == 1) {
-                    count[i] += 10;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (0 == i && board[0, j] == 2) {
+                    if (1 == countX[i]) {
+                        count[i] -= 10;
+                        countX[i]++;
+                    }else if(2 == countX[i]) {
+                        count[i] -= 100;
+                        countX[i] = 0;
+                    }else {
+                        count[i] -= 1;
+                        countX[i]++;
+                    }
+                } else if (0 == i && board[0, j] == 1) {
+                    if (1 == countO[i]) {
+                        count[i] += 10;
+                        countO[i]++;
+                    } else if (2 == countO[i]) {
+                        count[i] += 100;
+                        countO[i] = 0;
+                    } else {
+                        count[i] += 1;
+                        countO[i]++;
+                    }
                 }
-                if (1 == i && simArray[1, j] == 2) {
-                    count[i] -= 10;
-                } else if (1 == i && simArray[1, j] == 1) {
-                    count[i] += 10;
+                if (1 == i && board[1, j] == 2) {
+                    if (1 == countX[i]) {
+                        count[i] -= 10;
+                        countX[i]++;
+                    } else if (2 == countX[i]) {
+                        count[i] -= 100;
+                        countX[i] = 0;
+                    } else {
+                        count[i] -= 1;
+                        countX[i]++;
+                    }
+                } else if (1 == i && board[1, j] == 1) {
+                    if (1 == countO[i]) {
+                        count[i] += 10;
+                        countO[i]++;
+                    } else if (2 == countO[i]) {
+                        count[i] += 100;
+                        countO[i] = 0;
+                    } else {
+                        count[i] += 1;
+                        countO[i]++;
+                    }
                 }
-                if (2 == i && simArray[2, j] == 2) {
-                    count[i] -= 10;
-                } else if (2 == i && simArray[2, j] == 1) {
-                    count[i] += 10;
+                if (2 == i && board[2, j] == 2) {
+                    if (1 == countX[i]) {
+                        count[i] -= 10;
+                        countX[i]++;
+                    } else if (2 == countX[i]) {
+                        count[i] -= 100;
+                        countX[i] = 0;
+                    } else {
+                        count[i] -= 1;
+                        countX[i]++;
+                    }
+                } else if (2 == i && board[2, j] == 1) {
+                    if (1 == countO[i]) {
+                        count[i] += 10;
+                        countO[i]++;
+                    } else if (2 == countO[i]) {
+                        count[i] += 100;
+                        countO[i] = 0;
+                    } else {
+                        count[i] += 1;
+                        countO[i]++;
+                    }
                 }
             }
+            
             //Check diagonal
-            if (2 == simArray[i, i]) {
-                count[6] -= 10;
-            } else if(1 == simArray[i,i]){
-                count[6] += 10;
+            if (2 == board[i, i]) {
+                if (1 == countX[6]) {
+                    count[6] -= 10;
+                    countX[6]++;
+                } else if (2 == countX[6]) {
+                    count[6] -= 100;
+                    countX[6] = 0;
+                } else {
+                    count[6] -= 1;
+                    countX[6]++;
+                }
+            } else if (1 == board[i, i]) {
+                if (1 == countO[6]) {
+                    count[6] += 10;
+                    countO[6]++;
+                } else if (2 == countO[6]) {
+                    count[6] += 100;
+                    countO[6] = 0;
+                } else {
+                    count[6] += 1;
+                    countO[6]++;
+                }
             }
         }
 
         //Vertical - Column
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                if (0 == i && simArray[j, 0] == 2) {
-                    count[3 + i] -= 10;
-                } else if (0 == i && simArray[j, 0] == 1) {
-                    count[3 + i] += 10;
+                if (0 == i && board[j, 0] == 2) {
+                    if (1 == countX[3 + i]) {
+                        count[3 + i] -= 10;
+                        countX[3 + i]++;
+                    } else if (2 == countX[3 + i]) {
+                        count[3 + i] -= 100;
+                        countX[3 + i] = 0;
+                    } else {
+                        count[3 + i] -= 1;
+                        countX[3 + i]++;
+                    }
+                } else if (0 == i && board[j, 0] == 1) {
+                    if (1 == countO[3 + i]) {
+                        count[3 + i] += 10;
+                        countO[3 + i]++;
+                    } else if (2 == countO[3 + i]) {
+                        count[3 + i] += 100;
+                        countO[3 + i] = 0;
+                    } else {
+                        count[3 +i] += 1;
+                        countO[3 + i]++;
+                    }
                 }
-                if (1 == i && simArray[j, 1] == 2) {
-                    count[3 + i] -= 10;
-                } else if (1 == i && simArray[j, 1] == 1) {
-                    count[3 + i] += 10;
+                if (1 == i && board[j, 1] == 2) {
+                    if (1 == countX[3 + i]) {
+                        count[3 + i] -= 10;
+                        countX[3 + i]++;
+                    } else if (2 == countX[3 + i]) {
+                        count[3 + i] -= 100;
+                        countX[3 + i] = 0;
+                    } else {
+                        count[3 + i] -= 1;
+                        countX[3 + i]++;
+                    }
+                } else if (1 == i && board[j, 1] == 1) {
+                    if (1 == countO[3 + i]) {
+                        count[3 + i] += 10;
+                        countO[3 + i]++;
+                    } else if (2 == countO[3 + i]) {
+                        count[3 + i] += 100;
+                        countO[3 + i] = 0;
+                    } else {
+                        count[3 + i] += 1;
+                        countO[3 + i]++;
+                    }
                 }
-                if (2 == i && simArray[j, 2] == 2) {
-                    count[3 + i] -= 10;
-                } else if (2 == i && simArray[j, 2] == 1) {
-                    count[3 + i] += 10;
+                if (2 == i && board[j, 2] == 2) {
+                    if (1 == countX[3 + i]) {
+                        count[3 + i] -= 10;
+                        countX[3 + i]++;
+                    } else if (2 == countX[3 + i]) {
+                        count[3 + i] -= 100;
+                        countX[3 + i] = 0;
+                    } else {
+                        count[3 + i] -= 1;
+                        countX[3 + i]++;
+                    }
+                } else if (2 == i && board[j, 2] == 1) {
+                    if (1 == countO[3 + i]) {
+                        count[3 + i] += 10;
+                        countO[3 + i]++;
+                    } else if (2 == countO[3 + i]) {
+                        count[3 + i] += 100;
+                        countO[3 + i] = 0;
+                    } else {
+                        count[3 + i] += 1;
+                        countO[3 + i]++;
+                    }
                 }
             }
             //Check anti-diagonal
-            if (2 == simArray[i, 2 - i]) {
-                count[7] -= 10;
-            }else if(1 == simArray[i, 2 - i]) {
-                count[7] += 10;
+            if (2 == board[i, 2 - i]) {
+                if (1 == countX[7]) {
+                    count[7] -= 10;
+                    countX[7]++;
+                } else if (2 == countX[7]) {
+                    count[7] -= 100;
+                    countX[7] = 0;
+                } else {
+                    count[7] -= 1;
+                    countX[7]++;
+                }
+            } else if (1 == board[i, 2 - i]) {
+                if (1 == countO[7]) {
+                    count[7] += 10;
+                    countO[7]++;
+                } else if (2 == countO[7]) {
+                    count[7] += 100;
+                    countO[7] = 0;
+                } else {
+                    count[7] += 1;
+                    countO[7]++;
+                }
             }
         }
 
-        for(int i=0; i<8; i++) {
-            if(-20 == count[i]) {
-                //Rule 2: Block opponent's winning move
-                Debug.Log("Need to block count[" + i + "].");
-                AImove(i, player);
-                Debug.Log("--------------------return1");
-                return;
-            }
-            if(20 == count[i]) {
-                //Rule 1: Take the winning move
-                Debug.Log("Take winning move count[" + i + "].");
-                AImove(i, player);
-                Debug.Log("--------------------return2");
-                return;
-            }
+
+        for (int i=0; i<8; i++) {
+            sum += count[i];
         }
-        Debug.Log("   _ | _ | _ => " + count[0] +
-                  "\n   _ | _ | _ => " + count[1] +
-                  "\n   _ | _ | _ => " + count[2] +
-                  "\n   :    :    :" +
-                  "\n" + count[3] + " | " + count[4] + " | " + count[5] +
-                  "\n-> Diagonal: " + count[6] + 
-                  "\n-> Anti-Diag: " + count[7]);
+
+        //for (int i = 0; i < 8; i++) {
+        //    if (-20 == count[i]) {
+        //        //Rule 2: Block opponent's winning move
+        //        //Debug.Log("Need to block count[" + i + "].");
+        //        //AImove(i, player);
+        //        //Debug.Log("--------------------return1");
+        //        //return 100000;
+        //    }else if (20 == count[i]) {
+        //        //Rule 1: Take the winning move
+        //        //Debug.Log("Take winning move count[" + i + "].");
+        //        //AImove(i, player);
+        //        //Debug.Log("--------------------return2");
+        //        //return -100000;
+        //    }
+            
+        //}
+
+        //Debug.Log("sum: " + sum);
+        return sum;
     }
-    
+
     public void AImove(int n_element, int player) {
         switch (n_element) {
             case 0:
@@ -477,7 +788,6 @@ public class BoardControl : MonoBehaviour
                     textureSwap("TR", player);
                 break;
         }
-
     }
 
     // Update is called once per frame
@@ -509,8 +819,9 @@ public class BoardControl : MonoBehaviour
                     //winCheck();
                     //if AI, then AI move
                     //MiniMax(turn);
-                    //AIMinimax(MainArray, turn);
-                    simulatedWincheck(MainArray, turn);
+                    AIMinimax(MainArray, turn, 0);
+                    //simulatedWincheck(MainArray, turn);
+                    //print("" + boardEvaluation(MainArray, turn));
 
                 }
 
@@ -519,7 +830,119 @@ public class BoardControl : MonoBehaviour
     }
 }
 
+//public void simulatedWincheck(int[,] simArray, int player) {
+
+//    int[] count = { 0, 0, 0, 0, 0, 0, 0, 0 };
+//    int sum = 0;
+
+//    //Debug.Log("Player: " + player);
+
+//    //Heuristic Score check:
+//    //Horiziontal - Row
+//    for (int i = 0; i < 3; i++) {
+//        for (int j = 0; j < 3; j++) {
+//            if (0 == i && simArray[0, j] == 2) {
+//                count[i] -= 10;
+//            } else if (0 == i && simArray[0, j] == 1) {
+//                count[i] += 10;
+//            }
+//            if (1 == i && simArray[1, j] == 2) {
+//                count[i] -= 10;
+//            } else if (1 == i && simArray[1, j] == 1) {
+//                count[i] += 10;
+//            }
+//            if (2 == i && simArray[2, j] == 2) {
+//                count[i] -= 10;
+//            } else if (2 == i && simArray[2, j] == 1) {
+//                count[i] += 10;
+//            }
+//        }
+//        //Check diagonal
+//        if (2 == simArray[i, i]) {
+//            count[6] -= 10;
+//        } else if (1 == simArray[i, i]) {
+//            count[6] += 10;
+//        }
+//    }
+
+//    //Vertical - Column
+//    for (int i = 0; i < 3; i++) {
+//        for (int j = 0; j < 3; j++) {
+//            if (0 == i && simArray[j, 0] == 2) {
+//                count[3 + i] -= 10;
+//            } else if (0 == i && simArray[j, 0] == 1) {
+//                count[3 + i] += 10;
+//            }
+//            if (1 == i && simArray[j, 1] == 2) {
+//                count[3 + i] -= 10;
+//            } else if (1 == i && simArray[j, 1] == 1) {
+//                count[3 + i] += 10;
+//            }
+//            if (2 == i && simArray[j, 2] == 2) {
+//                count[3 + i] -= 10;
+//            } else if (2 == i && simArray[j, 2] == 1) {
+//                count[3 + i] += 10;
+//            }
+//        }
+//        //Check anti-diagonal
+//        if (2 == simArray[i, 2 - i]) {
+//            count[7] -= 10;
+//        } else if (1 == simArray[i, 2 - i]) {
+//            count[7] += 10;
+//        }
+//    }
+
+//    for (int i = 0; i < 8; i++) {
+//        if (-20 == count[i]) {
+//            //Rule 2: Block opponent's winning move
+//            Debug.Log("Need to block count[" + i + "].");
+//            AImove(i, player);
+//            Debug.Log("--------------------return1");
+//            return;
+//        } else if (20 == count[i]) {
+//            //Rule 1: Take the winning move
+//            Debug.Log("Take winning move count[" + i + "].");
+//            AImove(i, player);
+//            Debug.Log("--------------------return2");
+//            return;
+//        }
+//        sum += count[i];
+//    }
+//    Debug.Log("   _ | _ | _ => " + count[0] +
+//              "\n   _ | _ | _ => " + count[1] +
+//              "\n   _ | _ | _ => " + count[2] +
+//              "\n   :    :    :" +
+//              "\n" + count[3] + " | " + count[4] + " | " + count[5] +
+//              "\n-> Diagonal: " + count[6] +
+//              "\n-> Anti-Diag: " + count[7]);
+//    Debug.Log("Sum: " + sum);
+//}
+
+
+
 //AIMiniMax
+//Preferred moves in the order of left to right: 
+        //{1,1}, {0,0}, {0,2}, {2,0}, {2,2}, {0,1}, {1,0}, {1,2}, {2,1};
+
+        //if (simArray[1, 1] == 0) {
+        //    textureSwap("MM", player);
+        //}else if(simArray[0, 0]== 0) {
+        //    textureSwap("TL", player);
+        //} else if (simArray[0, 2] == 0) {
+        //    textureSwap("TR", player);
+        //} else if (simArray[2, 0] == 0) {
+        //    textureSwap("BL", player);
+        //} else if (simArray[2, 2] == 0) {
+        //    textureSwap("BR", player);
+        //} else if (simArray[0, 1] == 0) {
+        //    textureSwap("TM", player);
+        //} else if (simArray[1, 0] == 0) {
+        //    textureSwap("ML", player);
+        //} else if (simArray[1, 2] == 0) {
+        //    textureSwap("MR", player);
+        //} else if (simArray[2, 1] == 0) {
+        //    textureSwap("BM", player);
+        //}
 //for (int i = 0; i < 3; i++)
 //{
 //    for (int j = 0; j < 3; j++)
