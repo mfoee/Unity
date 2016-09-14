@@ -321,70 +321,40 @@ public class BoardControl : MonoBehaviour
         } else if (simArray[2, 1] == 0) {
             textureSwap("BM", player);
         }
-
-        //for (int i = 0; i < 3; i++)
-        //{
-        //    for (int j = 0; j < 3; j++)
-        //    {
-        //        //if (0 == simulatedArray[i,j]){
-        //        //    simulatedArray[i, j] = player;
-        //        //    AIMinimax(simulatedArray, abs(3 - player));
-        //        //}
-        //        //Debug.Log("turn: " + player + ", simulatedArray[" + i + "], [" + j + "]: " + simulatedArray[i, j]);
-        //    }
-        //}
-
-        //for (int i = 0; i < 3; i++) {
-        //    for (int j = 0; j < 3; j++) {
-        //        if (0 == simulatedArray[i, j]) {
-        //            //Debug.Log("next---------------------------------");
-        //            simulatedArray[i, j] = player;
-        //            AIMinimax(simulatedArray, abs(3 - player));
-        //        }
-
-        //        if(0 != simulatedWincheck(simulatedArray, player)) {
-        //            //Debug.Log("-------WinCheck: " + simulatedWincheck(simulatedArray, player));
-        //            return;
-        //        }
-        //    }
-        //}
     }
 
-    public int simulatedWincheck(int[,] simArray, int player)
+    public void simulatedWincheck(int[,] simArray, int player)
     {
-        
-        int count0 = 0, count1 = 0, count2 = 0;
-        int count3 = 0, count4 = 0, count5 = 0;
-        int count6 = 0, count7 = 0;
 
-        Debug.Log("Player: " + player);
+        int[] count = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+        //Debug.Log("Player: " + player);
 
         //Heuristic Score check:
         //Horiziontal - Row
         for(int i=0; i<3; i++) {
             for(int j=0; j<3; j++) {
                 if(0 == i && simArray[0,j] == 2) {
-                    count0 -= 10;
+                    count[i] -= 10;
                 }else if(0 == i && simArray[0,j] == 1) {
-                    count0 += 10;
+                    count[i] += 10;
                 }
                 if (1 == i && simArray[1, j] == 2) {
-                    count1 -= 10;
+                    count[i] -= 10;
                 } else if (1 == i && simArray[1, j] == 1) {
-                    count1 += 10;
+                    count[i] += 10;
                 }
                 if (2 == i && simArray[2, j] == 2) {
-                    count2 -= 10;
+                    count[i] -= 10;
                 } else if (2 == i && simArray[2, j] == 1) {
-                    count2 += 10;
+                    count[i] += 10;
                 }
             }
-
             //Check diagonal
             if (2 == simArray[i, i]) {
-                count6 -= 10;
+                count[6] -= 10;
             } else if(1 == simArray[i,i]){
-                count6 += 10;
+                count[6] += 10;
             }
         }
 
@@ -392,36 +362,123 @@ public class BoardControl : MonoBehaviour
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 if (0 == i && simArray[j, 0] == 2) {
-                    count3 -= 10;
+                    count[3 + i] -= 10;
                 } else if (0 == i && simArray[j, 0] == 1) {
-                    count3 += 10;
+                    count[3 + i] += 10;
                 }
                 if (1 == i && simArray[j, 1] == 2) {
-                    count4 -= 10;
+                    count[3 + i] -= 10;
                 } else if (1 == i && simArray[j, 1] == 1) {
-                    count4 += 10;
+                    count[3 + i] += 10;
                 }
                 if (2 == i && simArray[j, 2] == 2) {
-                    count5 -= 10;
+                    count[3 + i] -= 10;
                 } else if (2 == i && simArray[j, 2] == 1) {
-                    count5 += 10;
+                    count[3 + i] += 10;
                 }
             }
-
             //Check anti-diagonal
             if (2 == simArray[i, 2 - i]) {
-                count7 -= 10;
+                count[7] -= 10;
             }else if(1 == simArray[i, 2 - i]) {
-                count7 += 10;
+                count[7] += 10;
             }
         }
 
-        Debug.Log("|" + count0 + "|" + count1 + "|" + count2);
-        Debug.Log("|" + count3 + "|" + count4 + "|" + count5);
-        Debug.Log("|" + count6 + "|" + count7);
-        return 0;
+        for(int i=0; i<8; i++) {
+            if(-20 == count[i]) {
+                //Rule 2: Block opponent's winning move
+                Debug.Log("Need to block count[" + i + "].");
+                AImove(i, player);
+                Debug.Log("--------------------return1");
+                return;
+            }
+            if(20 == count[i]) {
+                //Rule 1: Take the winning move
+                Debug.Log("Take winning move count[" + i + "].");
+                AImove(i, player);
+                Debug.Log("--------------------return2");
+                return;
+            }
+        }
+        Debug.Log("   _ | _ | _ => " + count[0] +
+                  "\n   _ | _ | _ => " + count[1] +
+                  "\n   _ | _ | _ => " + count[2] +
+                  "\n   :    :    :" +
+                  "\n" + count[3] + " | " + count[4] + " | " + count[5] +
+                  "\n-> Diagonal: " + count[6] + 
+                  "\n-> Anti-Diag: " + count[7]);
     }
+    
+    public void AImove(int n_element, int player) {
+        switch (n_element) {
+            case 0:
+                if (0 == MainArray[0, 0])
+                    textureSwap("TL", player);
+                if (0 == MainArray[0, 1])
+                    textureSwap("TM", player);
+                if (0 == MainArray[0, 2])
+                    textureSwap("TR", player);
+                break;
+            case 1:
+                if (0 == MainArray[1, 0])
+                    textureSwap("ML", player);
+                if (0 == MainArray[1, 1])
+                    textureSwap("MM", player);
+                if (0 == MainArray[1, 2])
+                    textureSwap("MR", player);
+                break;
+            case 2:
+                if (0 == MainArray[2, 0])
+                    textureSwap("BL", player);
+                if (0 == MainArray[2, 1])
+                    textureSwap("BM", player);
+                if (0 == MainArray[2, 2])
+                    textureSwap("BR", player);
+                break;
+            case 3:
+                if (0 == MainArray[0, 0])
+                    textureSwap("TL", player);
+                if (0 == MainArray[1, 0])
+                    textureSwap("ML", player);
+                if (0 == MainArray[2, 0])
+                    textureSwap("BL", player);
+                break;
+            case 4:
+                if (0 == MainArray[0, 1])
+                    textureSwap("TM", player);
+                if (0 == MainArray[1, 1])
+                    textureSwap("MM", player);
+                if (0 == MainArray[2, 1])
+                    textureSwap("BM", player);
+                break;
+            case 5:
+                if (0 == MainArray[0, 2])
+                    textureSwap("TR", player);
+                if (0 == MainArray[1, 2])
+                    textureSwap("MR", player);
+                if (0 == MainArray[2, 2])
+                    textureSwap("BR", player);
+                break;
+            case 6:
+                if (0 == MainArray[0, 0])
+                    textureSwap("TL", player);
+                if (0 == MainArray[1, 1])
+                    textureSwap("MM", player);
+                if (0 == MainArray[2, 2])
+                    textureSwap("BR", player);
+                break;
+            case 7:
+                if (0 == MainArray[2, 0])
+                    textureSwap("BL", player);
+                if (0 == MainArray[1, 1])
+                    textureSwap("MM", player);
+                if (0 == MainArray[0, 2])
+                    textureSwap("TR", player);
+                break;
+        }
 
+    }
 
     // Update is called once per frame
     void Update() {
@@ -452,8 +509,8 @@ public class BoardControl : MonoBehaviour
                     //winCheck();
                     //if AI, then AI move
                     //MiniMax(turn);
-                    AIMinimax(MainArray, turn);
-                    //simulatedWincheck(MainArray, turn);
+                    //AIMinimax(MainArray, turn);
+                    simulatedWincheck(MainArray, turn);
 
                 }
 
@@ -461,3 +518,98 @@ public class BoardControl : MonoBehaviour
         }
     }
 }
+
+//AIMiniMax
+//for (int i = 0; i < 3; i++)
+//{
+//    for (int j = 0; j < 3; j++)
+//    {
+//        //if (0 == simulatedArray[i,j]){
+//        //    simulatedArray[i, j] = player;
+//        //    AIMinimax(simulatedArray, abs(3 - player));
+//        //}
+//        //Debug.Log("turn: " + player + ", simulatedArray[" + i + "], [" + j + "]: " + simulatedArray[i, j]);
+//    }
+//}
+
+//for (int i = 0; i < 3; i++) {
+//    for (int j = 0; j < 3; j++) {
+//        if (0 == simulatedArray[i, j]) {
+//            //Debug.Log("next---------------------------------");
+//            simulatedArray[i, j] = player;
+//            AIMinimax(simulatedArray, abs(3 - player));
+//        }
+
+//        if(0 != simulatedWincheck(simulatedArray, player)) {
+//            //Debug.Log("-------WinCheck: " + simulatedWincheck(simulatedArray, player));
+//            return;
+//        }
+//    }
+//}
+
+//switch (i) {
+//    case 0:
+//        if (0 == simArray[0, 0])
+//            textureSwap("TL", player);
+//        if (0 == simArray[0, 1])
+//            textureSwap("TM", player);
+//        if (0 == simArray[0, 2])
+//            textureSwap("TR", player);
+//        break;
+//    case 1:
+//        if (0 == simArray[1, 0])
+//            textureSwap("ML", player);
+//        if (0 == simArray[1, 1])
+//            textureSwap("MM", player);
+//        if (0 == simArray[1, 2])
+//            textureSwap("MR", player);
+//        break;
+//    case 2:
+//        if (0 == simArray[2, 0])
+//            textureSwap("BL", player);
+//        if (0 == simArray[2, 1])
+//            textureSwap("BM", player);
+//        if (0 == simArray[2, 2])
+//            textureSwap("BR", player);
+//        break;
+//    case 3:
+//        if (0 == simArray[0, 0])
+//            textureSwap("TL", player);
+//        if (0 == simArray[1, 0])
+//            textureSwap("ML", player);
+//        if (0 == simArray[2, 0])
+//            textureSwap("BL", player);
+//        break;
+//    case 4:
+//        if (0 == simArray[0, 1])
+//            textureSwap("TM", player);
+//        if (0 == simArray[1, 1])
+//            textureSwap("MM", player);
+//        if (0 == simArray[2, 1])
+//            textureSwap("BM", player);
+//        break;
+//    case 5:
+//        if (0 == simArray[0, 2])
+//            textureSwap("TR", player);
+//        if (0 == simArray[1, 2])
+//            textureSwap("MR", player);
+//        if (0 == simArray[2, 2])
+//            textureSwap("BR", player);
+//        break;
+//    case 6:
+//        if (0 == simArray[0, 0])
+//            textureSwap("TL", player);
+//        if (0 == simArray[1, 1])
+//            textureSwap("MM", player);
+//        if (0 == simArray[2, 2])
+//            textureSwap("BR", player);
+//        break;
+//    case 7:
+//        if (0 == simArray[2, 0])
+//            textureSwap("BL", player);
+//        if (0 == simArray[1, 1])
+//            textureSwap("MM", player);
+//        if (0 == simArray[0, 2])
+//            textureSwap("TR", player);
+//        break;
+//}
