@@ -19,6 +19,9 @@ public class BoardControl : MonoBehaviour {
 
     private int user, simWin;
 
+    private int countLoop;
+    private int highest, lowest;
+
     Transform selected;
     Renderer[] renderers;
 
@@ -39,6 +42,8 @@ public class BoardControl : MonoBehaviour {
         renderers = transform.GetComponentsInChildren<Renderer>();
         winner = 0;
 
+        countLoop = 0;
+        highest = 0; lowest = 0;
         //delete this later; here for testing
         //selected = transform.FindChild("TL"); -- Debug Line
     }
@@ -645,12 +650,58 @@ public class BoardControl : MonoBehaviour {
 
         //}
 
-        if (depth < 4) {
-            Debug.Log("Need to recursive");
-        }
+        //if (depth < 4) {
+        //    Debug.Log("Need to recursive");
+        //}
 
         //Debug.Log("sum: " + sum);
         return sum;
+    }
+
+    public void MiniMax(int[,] simArray, int player, int score, int depth) {
+
+        int currentScore = 0;
+        string board = "";
+        int goingup = 0;
+        
+
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                Debug.Log(i + ", " + j);
+                if (simArray[i, j] == 0 && countLoop < 15) {
+                    Debug.Log("inside if: " + i + ", " + j);
+                    simArray[i, j] = player;
+                    for (int x = 0; x < 3; x++) {
+                        for (int y = 0; y < 3; y++) {
+                            board += "[" + simArray[x, y] + "], ";
+                        }
+                        board += "\n";
+                    }
+                    Debug.Log(board);
+                    currentScore = boardEvaluation(simArray, player, depth);
+                    Debug.Log("iteration: " + countLoop + "; currentScore: " + currentScore + "; score: " + score + "; goingup: " + goingup);
+                    countLoop++; depth++;
+                    if (goingup == 0)
+                        MiniMax(simArray, abs(3 - player), currentScore + score, depth);
+                    //will not execute until Minimax has reached all the end (i.e. simArray[i, j] != 0)
+                    Debug.Log("before: -------- simArray[" + i + ", " + j + "]: " + simArray[i, j]);
+                    simArray[i, j] = 0;
+                    goingup = 1;
+                    Debug.Log("simArray[" + i + ", " + j + "]: " + simArray[i, j]);
+                    board = "";
+                    for (int x = 0; x < 3; x++) {
+                        for (int y = 0; y < 3; y++) {
+                            board += "[" + simArray[x, y] + "], ";
+                        }
+                        board += "\n";
+                    }
+                    Debug.Log(board + "/.");
+                }
+                
+                board = "";
+            }
+        }
+        
     }
 
     public void AImove(int n_element, int player) {
@@ -745,8 +796,8 @@ public class BoardControl : MonoBehaviour {
                     textureSwap(textSelect, turn);
                     //winCheck();
                     //if AI, then AI move
-                    //MiniMax(turn);
-                    AIMinimax(MainArray, turn);
+                    MiniMax(MainArray, turn, 0, 0);
+                    //AIMinimax(MainArray, turn);
                     //simulatedWincheck(MainArray, turn);
                     //print("" + boardEvaluation(MainArray, turn));
                 }
