@@ -668,7 +668,7 @@ public class BoardControl : MonoBehaviour {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 Debug.Log(i + ", " + j);
-                if (simArray[i, j] == 0 && countLoop < 15) {
+                if (simArray[i, j] == 0 && countLoop < 25) {
                     Debug.Log("inside if: " + i + ", " + j);
                     simArray[i, j] = player;
                     for (int x = 0; x < 3; x++) {
@@ -681,8 +681,11 @@ public class BoardControl : MonoBehaviour {
                     currentScore = boardEvaluation(simArray, player, depth);
                     Debug.Log("iteration: " + countLoop + "; currentScore: " + currentScore + "; score: " + score + "; goingup: " + goingup);
                     countLoop++; depth++;
-                    if (goingup == 0)
+                        Debug.Log("i: " + i + "; j: " + j);
+                    if ((i+j) != 4) {
+                        
                         MiniMax(simArray, abs(3 - player), currentScore + score, depth);
+                    }
                     //will not execute until Minimax has reached all the end (i.e. simArray[i, j] != 0)
                     Debug.Log("before: -------- simArray[" + i + ", " + j + "]: " + simArray[i, j]);
                     simArray[i, j] = 0;
