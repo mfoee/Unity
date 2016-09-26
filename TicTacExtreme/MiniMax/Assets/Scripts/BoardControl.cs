@@ -19,6 +19,7 @@ public class BoardControl : MonoBehaviour {
 
     private int user, simWin;
     private int setFlag;
+    private int temp, pos;
 
     private int endGame;
 
@@ -44,7 +45,7 @@ public class BoardControl : MonoBehaviour {
         currentTexture = 0;
         renderers = transform.GetComponentsInChildren<Renderer>();
         winner = 0;
-
+        
         highest = 0; lowest = 0;
         toggleAI = false;
 
@@ -52,6 +53,9 @@ public class BoardControl : MonoBehaviour {
         setFlag = 0;
         //delete this later; here for testing
         //selected = transform.FindChild("TL"); -- Debug Line
+
+        temp = 0;
+        pos = 0;
 
         print("1 Player or 2 Player?");
     }
@@ -308,8 +312,67 @@ public class BoardControl : MonoBehaviour {
 
     //AI optimized for a single board using the Minimax algorithm
 
+    public float AlphaBetaPruning(int depth, float alpha, float beta, int maxPlayer) {
+        //float score = 0;
+
+        //if (depth == 0) {
+        //    return score;
+        //}
+
+        //if (maxPlayer == opponent) {
+        //    score = -Mathf.Infinity + 1;
+        //    foreach (child) {
+        //        score = AlphaBetaPruning(depth - 1, alpha, beta, abs(3 - maxPlayer));
+        //        if (score > alpha)
+        //            alpha = score;
+        //        if (alpha >= beta)
+        //            break; // beta cut-off
+        //    }
+        //    return alpha;
+        //} else {
+        //    score = Mathf.Infinity - 1;
+        //    foreach (child) {
+        //        score = AlphaBetaPruning(depth - 1, alpha, beta, abs(3 - maxPlayer));
+        //        if (score < beta)
+        //            beta = score;
+        //        if (alpha >= beta)
+        //            break; // alpha cut-off
+        //    }
+        //    return beta;
+        //}
+
+        float score = 0;
+
+        if (depth == 0)
+            return score;
+
+        if(maxPlayer == opponent) {
+            for(int i = 0; i < 3; i++) {
+                for(int j = 0; j < 3; j++) {
+                    score = AlphaBetaPruning(depth - 1, alpha, beta, player);
+                    if (score > alpha)
+                        alpha = score;
+                    if (alpha >= beta)
+                        break;
+                }
+            }
+            return alpha;
+        }else {
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    score = AlphaBetaPruning(depth - 1, alpha, beta, opponent);
+                    if (score < beta)
+                        beta = score;
+                    if (alpha >= beta)
+                        break;
+                }
+            }
+            return beta;
+        }
+    }
+
     public void AIMinimax(int[,] simArray, int turn) {
-        int score = 0;
+        //int score = 0;
         //string empty = "empty: ";
 
         //for (int i = 0; i < 3; i++) {
@@ -325,119 +388,127 @@ public class BoardControl : MonoBehaviour {
         //if (simArray[1, 1] == 0) {
         //    textureSwap("MM", turn);
         //} else {
-            //--------------------------------------------------------------------------
-            //Rule 1: If there's a winning move, take it
-            //Horizontal
-            //for (int i = 0; i < 3; i++) {
-            //    if (simArray[i, 0] == opponent && simArray[i, 1] == opponent && simArray[i, 2] == 0) {
-            //        textureSwap(getPosition(i, 2), turn);
-            //        return;
-            //    }else if (simArray[i, 0] == opponent && simArray[i, 1] == 0 && simArray[i, 2] == opponent) {
-            //        textureSwap(getPosition(i, 1), turn);
-            //        return;
-            //    }else if (simArray[i, 0] == 0 && simArray[i, 1] == opponent && simArray[i, 2] == opponent) {
-            //        textureSwap(getPosition(i, 0), turn);
-            //        return;
-            //    }
-            //}
-            ////Vertical
-            //for (int i = 0; i < 3; i++) {
-            //    if (simArray[0, i] == opponent && simArray[1, i] == opponent && simArray[2, i] == 0) {
-            //        textureSwap(getPosition(2, i), turn);
-            //        return;
-            //    }else if (simArray[0, i] == opponent && simArray[1, i] == 0 && simArray[2, i] == opponent) {
-            //        textureSwap(getPosition(1, i), turn);
-            //        return;
-            //    }else if (simArray[0, i] == 0 && simArray[1, i] == opponent && simArray[2, i] == opponent) {
-            //        textureSwap(getPosition(0, i), turn);
-            //        return;
-            //    }
-            //}
+        //--------------------------------------------------------------------------
+        //Rule 1: If there's a winning move, take it
+        //Horizontal
+        for (int i = 0; i < 3; i++) {
+            if (simArray[i, 0] == opponent && simArray[i, 1] == opponent && simArray[i, 2] == 0) {
+                textureSwap(getPosition(i, 2), turn);
+                return;
+            } else if (simArray[i, 0] == opponent && simArray[i, 1] == 0 && simArray[i, 2] == opponent) {
+                textureSwap(getPosition(i, 1), turn);
+                return;
+            } else if (simArray[i, 0] == 0 && simArray[i, 1] == opponent && simArray[i, 2] == opponent) {
+                textureSwap(getPosition(i, 0), turn);
+                return;
+            }
+        }
+        //Vertical
+        for (int i = 0; i < 3; i++) {
+            if (simArray[0, i] == opponent && simArray[1, i] == opponent && simArray[2, i] == 0) {
+                textureSwap(getPosition(2, i), turn);
+                return;
+            } else if (simArray[0, i] == opponent && simArray[1, i] == 0 && simArray[2, i] == opponent) {
+                textureSwap(getPosition(1, i), turn);
+                return;
+            } else if (simArray[0, i] == 0 && simArray[1, i] == opponent && simArray[2, i] == opponent) {
+                textureSwap(getPosition(0, i), turn);
+                return;
+            }
+        }
 
-            ////Diagonal
-            //if (simArray[0, 0] == opponent && simArray[1, 1] == opponent && simArray[2, 2] == 0) {
-            //    textureSwap(getPosition(2, 2), turn);
-            //    return;
-            //}else if (simArray[0, 0] == opponent && simArray[1, 1] == 0 && simArray[2, 2] == opponent) {
-            //    textureSwap(getPosition(1, 1), turn);
-            //    return;
-            //}else if (simArray[0, 0] == 0 && simArray[1, 1] == opponent && simArray[2, 2] == opponent) {
-            //    textureSwap(getPosition(0, 0), turn);
-            //    return;
-            //}
+        //Diagonal
+        if (simArray[0, 0] == opponent && simArray[1, 1] == opponent && simArray[2, 2] == 0) {
+            textureSwap(getPosition(2, 2), turn);
+            return;
+        } else if (simArray[0, 0] == opponent && simArray[1, 1] == 0 && simArray[2, 2] == opponent) {
+            textureSwap(getPosition(1, 1), turn);
+            return;
+        } else if (simArray[0, 0] == 0 && simArray[1, 1] == opponent && simArray[2, 2] == opponent) {
+            textureSwap(getPosition(0, 0), turn);
+            return;
+        }
 
-            ////Anti-Diagonal
-            //if (simArray[2, 0] == opponent && simArray[1, 1] == opponent && simArray[0, 2] == 0) {
-            //    textureSwap(getPosition(0, 2), turn);
-            //    return;
-            //}else if (simArray[2, 0] == opponent && simArray[1, 1] == 0 && simArray[0, 2] == opponent) {
-            //    textureSwap(getPosition(1, 1), turn);
-            //    return;
-            //}else if (simArray[2, 0] == 0 && simArray[1, 1] == opponent && simArray[0, 2] == opponent) {
-            //    textureSwap(getPosition(2, 0), turn);
-            //    return;
-            //}
+        //Anti-Diagonal
+        if (simArray[2, 0] == opponent && simArray[1, 1] == opponent && simArray[0, 2] == 0) {
+            textureSwap(getPosition(0, 2), turn);
+            return;
+        } else if (simArray[2, 0] == opponent && simArray[1, 1] == 0 && simArray[0, 2] == opponent) {
+            textureSwap(getPosition(1, 1), turn);
+            return;
+        } else if (simArray[2, 0] == 0 && simArray[1, 1] == opponent && simArray[0, 2] == opponent) {
+            textureSwap(getPosition(2, 0), turn);
+            return;
+        }
 
-            ////--------------------------------------------------------------------------
-            ////Rule 2: If opponent has a winning move, block it
-            ////Horizontal
-            //for (int i = 0; i < 3; i++) {
-            //    if (simArray[i, 0] == player && simArray[i, 1] == player && simArray[i, 2] == 0) {
-            //        textureSwap(getPosition(i, 2), turn);
-            //        return;
-            //    }else if (simArray[i, 0] == player && simArray[i, 1] == 0 && simArray[i, 2] == player) {
-            //        textureSwap(getPosition(i, 1), turn);
-            //        return;
-            //    }else if (simArray[i, 0] == 0 && simArray[i, 1] == player && simArray[i, 2] == player) {
-            //        textureSwap(getPosition(i, 0), turn);
-            //        return;
-            //    }
-            //}
-            ////Vertical
-            //for (int i = 0; i < 3; i++) {
-            //    if (simArray[0, i] == player && simArray[1, i] == player && simArray[2, i] == 0) {
-            //        textureSwap(getPosition(2, i), turn);
-            //        return;
-            //    }else if (simArray[0, i] == player && simArray[1, i] == 0 && simArray[2, i] == player) {
-            //        textureSwap(getPosition(1, i), turn);
-            //        return;
-            //    }else if (simArray[0, i] == 0 && simArray[1, i] == player && simArray[2, i] == player) {
-            //        textureSwap(getPosition(0, i), turn);
-            //        return;
-            //    }
-            //}
+        //--------------------------------------------------------------------------
+        //Rule 2: If opponent has a winning move, block it
+        //Horizontal
+        for (int i = 0; i < 3; i++) {
+            if (simArray[i, 0] == player && simArray[i, 1] == player && simArray[i, 2] == 0) {
+                textureSwap(getPosition(i, 2), turn);
+                return;
+            } else if (simArray[i, 0] == player && simArray[i, 1] == 0 && simArray[i, 2] == player) {
+                textureSwap(getPosition(i, 1), turn);
+                return;
+            } else if (simArray[i, 0] == 0 && simArray[i, 1] == player && simArray[i, 2] == player) {
+                textureSwap(getPosition(i, 0), turn);
+                return;
+            }
+        }
+        //Vertical
+        for (int i = 0; i < 3; i++) {
+            if (simArray[0, i] == player && simArray[1, i] == player && simArray[2, i] == 0) {
+                textureSwap(getPosition(2, i), turn);
+                return;
+            } else if (simArray[0, i] == player && simArray[1, i] == 0 && simArray[2, i] == player) {
+                textureSwap(getPosition(1, i), turn);
+                return;
+            } else if (simArray[0, i] == 0 && simArray[1, i] == player && simArray[2, i] == player) {
+                textureSwap(getPosition(0, i), turn);
+                return;
+            }
+        }
 
-            ////Diagonal
-            //if (simArray[0, 0] == player && simArray[1, 1] == player && simArray[2, 2] == 0) {
-            //    textureSwap(getPosition(2, 2), turn);
-            //    return;
-            //}else if (simArray[0, 0] == player && simArray[1, 1] == 0 && simArray[2, 2] == player) {
-            //    textureSwap(getPosition(1, 1), turn);
-            //    return;
-            //}else if (simArray[0, 0] == 0 && simArray[1, 1] == player && simArray[2, 2] == player) {
-            //    textureSwap(getPosition(0, 0), turn);
-            //    return;
-            //}
+        //Diagonal
+        if (simArray[0, 0] == player && simArray[1, 1] == player && simArray[2, 2] == 0) {
+            textureSwap(getPosition(2, 2), turn);
+            return;
+        } else if (simArray[0, 0] == player && simArray[1, 1] == 0 && simArray[2, 2] == player) {
+            textureSwap(getPosition(1, 1), turn);
+            return;
+        } else if (simArray[0, 0] == 0 && simArray[1, 1] == player && simArray[2, 2] == player) {
+            textureSwap(getPosition(0, 0), turn);
+            return;
+        }
 
-            ////Anti-Diagonal
-            //if (simArray[2, 0] == player && simArray[1, 1] == player && simArray[0, 2] == 0) {
-            //    textureSwap(getPosition(0, 2), turn);
-            //    return;
-            //}else if (simArray[2, 0] == player && simArray[1, 1] == 0 && simArray[0, 2] == player) {
-            //    textureSwap(getPosition(1, 1), turn);1x
-            //    return;
-            //}else if (simArray[2, 0] == 0 && simArray[1, 1] == player && simArray[0, 2] == player) {
-            //    textureSwap(getPosition(2, 0), turn);
-            //    return;
-            //}
+        //Anti-Diagonal
+        if (simArray[2, 0] == player && simArray[1, 1] == player && simArray[0, 2] == 0) {
+            textureSwap(getPosition(0, 2), turn);
+            return;
+        } else if (simArray[2, 0] == player && simArray[1, 1] == 0 && simArray[0, 2] == player) {
+            textureSwap(getPosition(1, 1), turn);
+             return;
+        } else if (simArray[2, 0] == 0 && simArray[1, 1] == player && simArray[0, 2] == player) {
+            textureSwap(getPosition(2, 0), turn);
+            return;
+        }
 
-            int[] test = { 0, 0 };
-            //--------------------------------------------------------------------------
-            //Rule 3: If you can create a fork, do so (i.e. multiple winning moves)
-            MiniMax(simArray, turn, score, 0);
-            //textureSwap(getPosition(test[0], test[1]), turn);
-            //Debug.Log(test[0] + ", " + test[1] + "-----test");
-            //Debug.Log("end of AIMinimax---------");
+        int[] test = { 0, 0 };
+        //--------------------------------------------------------------------------
+        //Rule 3: If you can create a fork, do so (i.e. multiple winning moves)
+        MiniMax(MainArray, turn, 0, 0);
+        for (int i = 0; i < 9; i++) {
+            if (temp < countMove[i]) {
+                temp = countMove[i];
+                pos = i;
+            }
+        }
+        Debug.Log(pos);
+        textureSwap(AImove(pos), turn);
+        //textureSwap(getPosition(test[0], test[1]), turn);
+        //Debug.Log(test[0] + ", " + test[1] + "-----test");
+        //Debug.Log("end of AIMinimax---------");
         //}
     }
 
@@ -732,7 +803,7 @@ public class BoardControl : MonoBehaviour {
     public void MiniMax(int[,] simArray, int turn, int score, int depth) {
 
         int currentScore = 0;
-        string board = "";
+        //string board = "";
 
                
         for (int i = 0; i < 3; i++) {
@@ -743,13 +814,13 @@ public class BoardControl : MonoBehaviour {
                     simArray[i, j] = turn;
 
                     //Debug - Portion-----------------------------------------------
-                    for (int x = 0; x < 3; x++) {
-                        for (int y = 0; y < 3; y++) {
-                            board += "[" + simArray[x, y] + "], ";
-                        }
-                        board += "\n";
-                    }
-                    Debug.Log(board);
+                    ////for (int x = 0; x < 3; x++) {
+                    ////    for (int y = 0; y < 3; y++) {
+                    ////        board += "[" + simArray[x, y] + "], ";
+                    ////    }
+                    ////    board += "\n";
+                    ////}
+                    ////Debug.Log(board);
                     //---------------------------------------------------------------
                     currentScore = boardEvaluation(simArray);
 
@@ -785,22 +856,23 @@ public class BoardControl : MonoBehaviour {
                     //Debug.Log("simArray[" + i + ", " + j + "]: " + simArray[i, j]);
 
                     //Debug - Portion-----------------------------------------------
-                    board = "";
-                    for (int x = 0; x < 3; x++) {
-                        for (int y = 0; y < 3; y++) {
-                            board += "[" + simArray[x, y] + "], ";
-                        }
-                        board += "\n";
-                    }
-                    Debug.Log(board + "/.");
+                    //board = "";
+                    //for (int x = 0; x < 3; x++) {
+                    //    for (int y = 0; y < 3; y++) {
+                    //        board += "[" + simArray[x, y] + "], ";
+                    //    }
+                    //    board += "\n";
+                    //}
+                    //Debug.Log(board + "/.");
                     //---------------------------------------------------------------
                 }
-                board = ""; //Debug line
+                //board = ""; //Debug line
             }
 
         }
         //Debug.Log(high[0] + ", " + high[1] + "-----");
     }
+
 
 
     // Update is called once per frame
@@ -834,7 +906,11 @@ public class BoardControl : MonoBehaviour {
                 }
             }
         }
-        
+        if(endGame == 1) {
+            if (Input.GetKeyDown(KeyCode.R)) {
+                Debug.Log("RESTART");
+            }
+        }
     }
 
     void LateUpdate() {
@@ -842,19 +918,23 @@ public class BoardControl : MonoBehaviour {
             Debug.Log("run AI-----------------------------");
             highest = 0; lowest = 0;
             //AIMinimax(MainArray, turn);
-            MiniMax(MainArray, turn, 0, 0);
-            Debug.Log(high[0] + ", " + high[1] + "-----");
-            Debug.Log(countMove[0] + ", " + countMove[1] + ", " + countMove[2] +
-                    ", " + countMove[3] + ", " + countMove[4] + ", " + countMove[5] +
-                    ", " + countMove[6] + ", " + countMove[7] + ", " + countMove[8]);
-            int temp = 0;
-            for(int i = 0; i< 9; i++) {
-                if (temp < countMove[i])
-                    temp = countMove[i];
-            }
-            textureSwap(AImove(temp), turn);
+            //MiniMax(MainArray, turn, 0, 0);
+            //Debug.Log(high[0] + ", " + high[1] + "-----");
+            //Debug.Log(countMove[0] + ", " + countMove[1] + ", " + countMove[2] +
+            //        ", " + countMove[3] + ", " + countMove[4] + ", " + countMove[5] +
+            //        ", " + countMove[6] + ", " + countMove[7] + ", " + countMove[8]);
             winCheck();
             toggleAI = false;
         }
     }
 }
+
+
+//public void resetBoard() {
+//    print("Would you like to play another game? (y/n)");
+//    if (Input.GetKeyDown(KeyCode.Y)) {
+
+//    } else if (Input.GetKeyDown(KeyCode.N)) {
+//        print("Good Game.");
+//    }
+//}
