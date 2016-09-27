@@ -238,7 +238,7 @@ public class BoardControl : MonoBehaviour {
     public int MiniMaxAB(int[,] simArray, int depth, int alpha, int beta, int turn) {
 
         //string empty = "empty: ";
-        //string board = "";
+        string board = "";
 
         //for (int i = 0; i < 3; i++) {
         //    for (int j = 0; j < 3; j++) {
@@ -248,12 +248,12 @@ public class BoardControl : MonoBehaviour {
         //    }
         //}
         //Debug.Log(empty + "\nPlayer: " + turn + "\nDepth: " + depth + "\nWinner: " + winner);
-        
+
 
         //winCheck();
         if (depth <= 0 || winner != 0) {
             currentScore = boardEvaluation(simArray);
-            //Debug.Log("currentScore: " + currentScore + ", winner: " + winner);
+            Debug.Log("currentScore: " + currentScore + ", winner: " + winner + "depth 0");
             return currentScore;
         }
 
@@ -264,41 +264,41 @@ public class BoardControl : MonoBehaviour {
                     if(simArray[i, j] == 0) {
                         simArray[i, j] = opponent;
 
-                        //for (int x = 0; x < 3; x++) {
-                        //    for (int y = 0; y < 3; y++) {
-                        //        board += "[" + simArray[x, y] + "], ";
-                        //    }
-                        //    board += "\n";
-                        //}
-                        //Debug.Log(board + "opponent");
+                        for (int x = 0; x < 3; x++) {
+                            for (int y = 0; y < 3; y++) {
+                                board += "[" + simArray[x, y] + "], ";
+                            }
+                            board += "\n";
+                        }
+                        Debug.Log(board + "opponent");
 
                         currentScore = MiniMaxAB(simArray, depth - 1, alpha, beta, player);
-                        //Debug.Log("currentScore: " + currentScore + ", alpha: " + alpha + ", beta: " + beta + "-------- opponent");
+                        Debug.Log("currentScore: " + currentScore + ", alpha: " + alpha + ", beta: " + beta + "-------- opponent");
                         if (currentScore > alpha) {
                             alpha = currentScore;
-                            //Debug.Log("bestMove(opponent): " + i + ", " +  j);
+                            Debug.Log("bestMove(opponent): " + i + ", " +  j);
                             //best move for opponent
                             bestMove[0] = i;
                             bestMove[1] = j;
                         }
                         if (alpha >= beta) {
                             //Debug.Log("beta cut-off");
-                            //board = ""; //Debug line
+                            board = ""; //Debug line
                             simArray[i, j] = 0;
                             break; //beta cut-off
                         }
                         simArray[i, j] = 0;
 
-                        //board = "";
-                        //for (int x = 0; x < 3; x++) {
-                        //    for (int y = 0; y < 3; y++) {
-                        //        board += "[" + simArray[x, y] + "], ";
-                        //    }
-                        //    board += "\n";
-                        //}
-                        //Debug.Log(board + "/. opponent");
+                        board = "";
+                        for (int x = 0; x < 3; x++) {
+                            for (int y = 0; y < 3; y++) {
+                                board += "[" + simArray[x, y] + "], ";
+                            }
+                            board += "\n";
+                        }
+                        Debug.Log(board + "/. opponent");
                     }
-                    //board = ""; //Debug line
+                    board = ""; //Debug line
                 }
             }
             return alpha;
@@ -309,16 +309,16 @@ public class BoardControl : MonoBehaviour {
                     if (simArray[i, j] == 0) {
                         simArray[i, j] = player;
 
-                        //for (int x = 0; x < 3; x++) {
-                        //    for (int y = 0; y < 3; y++) {
-                        //        board += "[" + simArray[x, y] + "], ";
-                        //    }
-                        //    board += "\n";
-                        //}
-                        //Debug.Log(board + "player");
+                        for (int x = 0; x < 3; x++) {
+                            for (int y = 0; y < 3; y++) {
+                                board += "[" + simArray[x, y] + "], ";
+                            }
+                            board += "\n";
+                        }
+                        Debug.Log(board + "player");
 
                         currentScore = MiniMaxAB(simArray, depth - 1, alpha, beta, opponent);
-                        //Debug.Log("currentScore: " + currentScore + ", beta: " + beta + ", alpha: " + alpha + "-------- player");
+                        Debug.Log("currentScore: " + currentScore + ", beta: " + beta + ", alpha: " + alpha + "-------- player");
                         if (currentScore < beta) {
                             beta = currentScore;
                             //Debug.Log("bestMove(player): " + i + ", " + j);
@@ -326,23 +326,23 @@ public class BoardControl : MonoBehaviour {
                         }
                         if (alpha >= beta) {
                             //Debug.Log("alpha cut-off");
-                            //board = ""; //Debug line
+                            board = ""; //Debug line
                             simArray[i, j] = 0;
                             break; //alpha cut-off
                         }
                             
                         simArray[i, j] = 0;
 
-                        //board = "";
-                        //for (int x = 0; x < 3; x++) {
-                        //    for (int y = 0; y < 3; y++) {
-                        //        board += "[" + simArray[x, y] + "], ";
-                        //    }
-                        //    board += "\n";
-                        //}
-                        //Debug.Log(board + "/. player");
+                        board = "";
+                        for (int x = 0; x < 3; x++) {
+                            for (int y = 0; y < 3; y++) {
+                                board += "[" + simArray[x, y] + "], ";
+                            }
+                            board += "\n";
+                        }
+                        Debug.Log(board + "/. player");
                     }
-                    //board = ""; //Debug line
+                    board = ""; //Debug line
                 }
             }
             return beta;
@@ -357,236 +357,66 @@ public class BoardControl : MonoBehaviour {
         int[] countO = { 0, 0, 0, 0, 0, 0, 0, 0 };
         int sum = 0;
 
-        //Heuristic Score check:
-        //Horiziontal - Row
+        //Heuristic Scorring
+        //for Player: -- (subtract)
+        //for Opponent: -- (addition)
         for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (0 == i && board[0, j] == player) { //subtract for player
-                    if (1 == countX[i]) {
-                        count[i] -= 10;
-                        countX[i]++;
-                    } else if (2 == countX[i]) {
-                        count[i] -= 100;
-                        countX[i] = 0;
-                    } else {
-                        count[i] -= 1;
-                        countX[i]++;
-                    }
-                } else if (0 == i && board[0, j] == opponent) { //addition for opponent/ai
-                    if (1 == countO[i]) {
-                        count[i] += 10;
-                        countO[i]++;
-                    } else if (2 == countO[i]) {
-                        count[i] += 100;
-                        countO[i] = 0;
-                    } else {
-                        count[i] += 1;
-                        countO[i]++;
-                    }
+            for(int j = 0; j < 3; j++) {
+                //Horizontal
+                if (board[i, j] == player) {
+                    countX[i]++; //player count
+                }else if(board[i, j] == opponent) {
+                    countO[i]++; //opponent count
                 }
-                if (1 == i && board[1, j] == player) { //subtract for player
-                    if (1 == countX[i]) {
-                        count[i] -= 10;
-                        countX[i]++;
-                    } else if (2 == countX[i]) {
-                        count[i] -= 100;
-                        countX[i] = 0;
-                    } else {
-                        count[i] -= 1;
-                        countX[i]++;
-                    }
-                } else if (1 == i && board[1, j] == opponent) { //addition for opponent/ai
-                    if (1 == countO[i]) {
-                        count[i] += 10;
-                        countO[i]++;
-                    } else if (2 == countO[i]) {
-                        count[i] += 100;
-                        countO[i] = 0;
-                    } else {
-                        count[i] += 1;
-                        countO[i]++;
-                    }
-                }
-                if (2 == i && board[2, j] == player) { //subtract for player
-                    if (1 == countX[i]) {
-                        count[i] -= 10;
-                        countX[i]++;
-                    } else if (2 == countX[i]) {
-                        count[i] -= 100;
-                        countX[i] = 0;
-                    } else {
-                        count[i] -= 1;
-                        countX[i]++;
-                    }
-                } else if (2 == i && board[2, j] == opponent) { //addition for opponent/ai
-                    if (1 == countO[i]) {
-                        count[i] += 10;
-                        countO[i]++;
-                    } else if (2 == countO[i]) {
-                        count[i] += 100;
-                        countO[i] = 0;
-                    } else {
-                        count[i] += 1;
-                        countO[i]++;
-                    }
+                //Vertical
+                if (board[j, i] == player) {
+                    countX[i + 3]++; //player count
+                }else if(board[j, i] == opponent) {
+                    countO[i + 3]++; //opponent count
                 }
             }
+            //Diagonal
+            if(board[i, i] == player) {
+                countX[6]++; //player count
+            }else if(board[i, i] == opponent) {
+                countO[6]++; //opponent count
+            }
+            //Anti-Diagonal
+            if (board[i, 2 - i] == player) {
+                countX[7]++; //player count
+            }else if(board[i, 2 - i] == opponent) {
+                countO[7]++; //opponent count
+            }
+        }
+        Debug.Log("countX: " + countX[0] + ", " + countX[1] + ", " + countX[2] + ", " + countX[3] + ", " + countX[4] + ", " + countX[5] + ", " + countX[6] + ", " + countX[7] + ".");
+        Debug.Log("countO: " + countO[0] + ", " + countO[1] + ", " + countO[2] + ", " + countO[3] + ", " + countO[4] + ", " + countO[5] + ", " + countO[6] + ", " + countO[7] + ".");
+        //POINTs
+        for (int i = 0; i < 8; i++) {
+            //Player scoring
+            if(countX[i] == 1) {
+                count[i] -= 1;
+            }else if(countX[i] == 2) {
+                count[i] -= 10;
+            }else if(countX[i] == 3) {
+                count[i] -= 100;
+            }
 
-            //Check diagonal
-            if (player == board[i, i]) { //subtract for player
-                if (1 == countX[6]) {
-                    count[6] -= 10;
-                    countX[6]++;
-                } else if (2 == countX[6]) { 
-                    count[6] -= 100;
-                    countX[6] = 0;
-                } else {
-                    count[6] -= 1;
-                    countX[6]++;
-                }
-            } else if (opponent == board[i, i]) { //addition for opponent/ai
-                if (1 == countO[6]) {
-                    count[6] += 10;
-                    countO[6]++;
-                } else if (2 == countO[6]) {
-                    count[6] += 100;
-                    countO[6] = 0;
-                } else {
-                    count[6] += 1;
-                    countO[6]++;
-                }
+            //Opponent scoring
+            if(countO[i] == 1) {
+                count[i] += 1;
+            }else if(countO[i] == 2) {
+                count[i] += 10;
+            }else if(countO[i] == 3) {
+                count[i] += 100;
             }
         }
 
-        //Vertical - Column
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (0 == i && board[j, 0] == player) { //subtract for player
-                    if (1 == countX[3 + i]) {
-                        count[3 + i] -= 10;
-                        countX[3 + i]++;
-                    } else if (2 == countX[3 + i]) {
-                        count[3 + i] -= 100;
-                        countX[3 + i] = 0;
-                    } else {
-                        count[3 + i] -= 1;
-                        countX[3 + i]++;
-                    }
-                } else if (0 == i && board[j, 0] == opponent) { //subtract for opponent/ai
-                    if (1 == countO[3 + i]) {
-                        count[3 + i] += 10;
-                        countO[3 + i]++;
-                    } else if (2 == countO[3 + i]) {
-                        count[3 + i] += 100;
-                        countO[3 + i] = 0;
-                    } else {
-                        count[3 + i] += 1;
-                        countO[3 + i]++;
-                    }
-                }
-                if (1 == i && board[j, 1] == player) { //subtract for player
-                    if (1 == countX[3 + i]) {
-                        count[3 + i] -= 10;
-                        countX[3 + i]++;
-                    } else if (2 == countX[3 + i]) {
-                        count[3 + i] -= 100;
-                        countX[3 + i] = 0;
-                    } else {
-                        count[3 + i] -= 1;
-                        countX[3 + i]++;
-                    }
-                } else if (1 == i && board[j, 1] == opponent) { //subtract for opponent/ai
-                    if (1 == countO[3 + i]) {
-                        count[3 + i] += 10;
-                        countO[3 + i]++;
-                    } else if (2 == countO[3 + i]) {
-                        count[3 + i] += 100;
-                        countO[3 + i] = 0;
-                    } else {
-                        count[3 + i] += 1;
-                        countO[3 + i]++;
-                    }
-                }
-                if (2 == i && board[j, 2] == player) { //subtract for player
-                    if (1 == countX[3 + i]) {
-                        count[3 + i] -= 10;
-                        countX[3 + i]++;
-                    } else if (2 == countX[3 + i]) {
-                        count[3 + i] -= 100;
-                        countX[3 + i] = 0;
-                    } else {
-                        count[3 + i] -= 1;
-                        countX[3 + i]++;
-                    }
-                } else if (2 == i && board[j, 2] == opponent) { //subtract for opponent/ai
-                    if (1 == countO[3 + i]) {
-                        count[3 + i] += 10;
-                        countO[3 + i]++;
-                    } else if (2 == countO[3 + i]) {
-                        count[3 + i] += 100;
-                        countO[3 + i] = 0;
-                    } else {
-                        count[3 + i] += 1;
-                        countO[3 + i]++;
-                    }
-                }
-            }
-            //Check anti-diagonal
-            if (player == board[i, 2 - i]) { //subtract for player
-                if (1 == countX[7]) {
-                    count[7] -= 10;
-                    countX[7]++;
-                } else if (2 == countX[7]) {
-                    count[7] -= 100;
-                    countX[7] = 0;
-                } else {
-                    count[7] -= 1;
-                    countX[7]++;
-                }
-            } else if (opponent == board[i, 2 - i]) { //addition for opponent/ai
-                if (1 == countO[7]) {
-                    count[7] += 10;
-                    countO[7]++;
-                } else if (2 == countO[7]) {
-                    count[7] += 100;
-                    countO[7] = 0;
-                } else {
-                    count[7] += 1;
-                    countO[7]++;
-                }
-            }
-        }
-
-        //Debug.Log("c0: " + count[0] + ", c1: " + count[1] + ", c2: " + count[2] +
-        //            "\nc3: " + count[3] + ", c4: " + count[4] + ", c5: " + count[5] +
-        //            "\nc6: " + count[6] + ", c7: " + count[7]);
+        Debug.Log("count: " + count[0] + ", " + count[1] + ", " + count[2] + ", " + count[3] + ", " + count[4] + ", " + count[5] + ", " + count[6] + ", " + count[7] + ".");
 
         for (int i = 0; i < 8; i++) {
             sum += count[i];
         }
 
-        //for (int i = 0; i < 8; i++) {
-        //    if (-20 == count[i]) {
-        //        //Rule 2: Block opponent's winning move
-        //        //Debug.Log("Need to block count[" + i + "].");
-        //        //AImove(i, player);
-        //        //Debug.Log("--------------------return1");
-        //        //return 100000;
-        //    }else if (20 == count[i]) {
-        //        //Rule 1: Take the winning move
-        //        //Debug.Log("Take winning move count[" + i + "].");
-        //        //AImove(i, player);
-        //        //Debug.Log("--------------------return2");
-        //        //return -100000;
-        //    }
-
-        //}
-
-        //if (depth < 4) {
-        //    Debug.Log("Need to recursive");
-        //}
-
-        //Debug.Log("sum: " + sum);
         return sum;
     }
 
@@ -666,8 +496,8 @@ public class BoardControl : MonoBehaviour {
     void LateUpdate() {
         if (toggleAI) {
             //Debug.Log("run AI-----------------------------");
-            //Debug.Log("--: " + MiniMaxAB(MainArray, 2, int.MinValue, int.MaxValue, turn) + ", bestMove: " + bestMove[0] + ", " + bestMove[1]);
-            MiniMaxAB(MainArray, 2, int.MinValue, int.MaxValue, turn);
+            Debug.Log("--: " + MiniMaxAB(MainArray, 2, int.MinValue, int.MaxValue, turn) + ", bestMove: " + bestMove[0] + ", " + bestMove[1]);
+            //MiniMaxAB(MainArray, 2, int.MinValue, int.MaxValue, turn);
             textureSwap(getPosition(bestMove[0],bestMove[1]), turn);
             winCheck();
             toggleAI = false;
