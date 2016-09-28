@@ -238,7 +238,16 @@ public class BoardControl : MonoBehaviour {
     public int MiniMaxAB(int[,] simArray, int depth, int alpha, int beta, int turn) {
 
         //string empty = "empty: ";
+        int gameover = 0;
         string board = "";
+
+        for(int i = 0; i < 3; i++) {
+            for(int j = 0; j < 3; j++) {
+                if(simArray[i, j] == 0) {
+                    gameover++;
+                }
+            }
+        }
 
         //for (int i = 0; i < 3; i++) {
         //    for (int j = 0; j < 3; j++) {
@@ -251,54 +260,54 @@ public class BoardControl : MonoBehaviour {
 
 
         //winCheck();
-        if (depth <= 0 || winner != 0) {
-            currentScore = boardEvaluation(simArray);
-            Debug.Log("currentScore: " + currentScore + ", winner: " + winner + "depth 0");
-            return currentScore;
+        if (depth == 0 || gameover == 0) {
+            //currentScore = boardEvaluation(simArray);
+            //Debug.Log("currentScore: " + currentScore + ", winner: " + winner + ", depth: " + depth);
+            return boardEvaluation(simArray);
         }
 
         if(turn == opponent) { //maximize - opponent (AI)
             
-            for (int i =0; i< 3; i++) {
-                for(int j=0; j< 3; j++) {
+            for (int i = 0; i< 3; i++) {
+                for(int j = 0; j < 3; j++) {
                     if(simArray[i, j] == 0) {
                         simArray[i, j] = opponent;
 
-                        for (int x = 0; x < 3; x++) {
-                            for (int y = 0; y < 3; y++) {
-                                board += "[" + simArray[x, y] + "], ";
-                            }
-                            board += "\n";
-                        }
-                        Debug.Log(board + "opponent");
+                        //for (int x = 0; x < 3; x++) {
+                        //    for (int y = 0; y < 3; y++) {
+                        //        board += "[" + simArray[x, y] + "], ";
+                        //    }
+                        //    board += "\n";
+                        //}
+                        //Debug.Log(board + "opponent");
 
                         currentScore = MiniMaxAB(simArray, depth - 1, alpha, beta, player);
-                        Debug.Log("currentScore: " + currentScore + ", alpha: " + alpha + ", beta: " + beta + "-------- opponent");
+                        //Debug.Log("currentScore: " + currentScore + ", alpha: " + alpha + ", beta: " + beta + "-------- opponent");
                         if (currentScore > alpha) {
                             alpha = currentScore;
-                            Debug.Log("bestMove(opponent): " + i + ", " +  j);
+                            //Debug.Log("bestMove(opponent): " + i + ", " +  j);
                             //best move for opponent
                             bestMove[0] = i;
                             bestMove[1] = j;
                         }
                         if (alpha >= beta) {
                             //Debug.Log("beta cut-off");
-                            board = ""; //Debug line
+                            //board = ""; //Debug line
                             simArray[i, j] = 0;
                             break; //beta cut-off
                         }
                         simArray[i, j] = 0;
 
-                        board = "";
-                        for (int x = 0; x < 3; x++) {
-                            for (int y = 0; y < 3; y++) {
-                                board += "[" + simArray[x, y] + "], ";
-                            }
-                            board += "\n";
-                        }
-                        Debug.Log(board + "/. opponent");
+                        //board = "";
+                        //for (int x = 0; x < 3; x++) {
+                        //    for (int y = 0; y < 3; y++) {
+                        //        board += "[" + simArray[x, y] + "], ";
+                        //    }
+                        //    board += "\n";
+                        //}
+                        //Debug.Log(board + "/. opponent");
                     }
-                    board = ""; //Debug line
+                    //board = ""; //Debug line
                 }
             }
             return alpha;
@@ -309,16 +318,16 @@ public class BoardControl : MonoBehaviour {
                     if (simArray[i, j] == 0) {
                         simArray[i, j] = player;
 
-                        for (int x = 0; x < 3; x++) {
-                            for (int y = 0; y < 3; y++) {
-                                board += "[" + simArray[x, y] + "], ";
-                            }
-                            board += "\n";
-                        }
-                        Debug.Log(board + "player");
+                        //for (int x = 0; x < 3; x++) {
+                        //    for (int y = 0; y < 3; y++) {
+                        //        board += "[" + simArray[x, y] + "], ";
+                        //    }
+                        //    board += "\n";
+                        //}
+                        //Debug.Log(board + "player");
 
                         currentScore = MiniMaxAB(simArray, depth - 1, alpha, beta, opponent);
-                        Debug.Log("currentScore: " + currentScore + ", beta: " + beta + ", alpha: " + alpha + "-------- player");
+                        //Debug.Log("currentScore: " + currentScore + ", beta: " + beta + ", alpha: " + alpha + "-------- player");
                         if (currentScore < beta) {
                             beta = currentScore;
                             //Debug.Log("bestMove(player): " + i + ", " + j);
@@ -326,23 +335,23 @@ public class BoardControl : MonoBehaviour {
                         }
                         if (alpha >= beta) {
                             //Debug.Log("alpha cut-off");
-                            board = ""; //Debug line
+                            //board = ""; //Debug line
                             simArray[i, j] = 0;
                             break; //alpha cut-off
                         }
                             
                         simArray[i, j] = 0;
 
-                        board = "";
-                        for (int x = 0; x < 3; x++) {
-                            for (int y = 0; y < 3; y++) {
-                                board += "[" + simArray[x, y] + "], ";
-                            }
-                            board += "\n";
-                        }
-                        Debug.Log(board + "/. player");
+                        //board = "";
+                        //for (int x = 0; x < 3; x++) {
+                        //    for (int y = 0; y < 3; y++) {
+                        //        board += "[" + simArray[x, y] + "], ";
+                        //    }
+                        //    board += "\n";
+                        //}
+                        //Debug.Log(board + "/. player");
                     }
-                    board = ""; //Debug line
+                    //board = ""; //Debug line
                 }
             }
             return beta;
@@ -388,8 +397,8 @@ public class BoardControl : MonoBehaviour {
                 countO[7]++; //opponent count
             }
         }
-        Debug.Log("countX: " + countX[0] + ", " + countX[1] + ", " + countX[2] + ", " + countX[3] + ", " + countX[4] + ", " + countX[5] + ", " + countX[6] + ", " + countX[7] + ".");
-        Debug.Log("countO: " + countO[0] + ", " + countO[1] + ", " + countO[2] + ", " + countO[3] + ", " + countO[4] + ", " + countO[5] + ", " + countO[6] + ", " + countO[7] + ".");
+        //Debug.Log("countX: " + countX[0] + ", " + countX[1] + ", " + countX[2] + ", " + countX[3] + ", " + countX[4] + ", " + countX[5] + ", " + countX[6] + ", " + countX[7] + ".");
+        //Debug.Log("countO: " + countO[0] + ", " + countO[1] + ", " + countO[2] + ", " + countO[3] + ", " + countO[4] + ", " + countO[5] + ", " + countO[6] + ", " + countO[7] + ".");
         //POINTs
         for (int i = 0; i < 8; i++) {
             //Player scoring
@@ -411,7 +420,7 @@ public class BoardControl : MonoBehaviour {
             }
         }
 
-        Debug.Log("count: " + count[0] + ", " + count[1] + ", " + count[2] + ", " + count[3] + ", " + count[4] + ", " + count[5] + ", " + count[6] + ", " + count[7] + ".");
+        //Debug.Log("count: " + count[0] + ", " + count[1] + ", " + count[2] + ", " + count[3] + ", " + count[4] + ", " + count[5] + ", " + count[6] + ", " + count[7] + ".");
 
         for (int i = 0; i < 8; i++) {
             sum += count[i];
@@ -496,8 +505,8 @@ public class BoardControl : MonoBehaviour {
     void LateUpdate() {
         if (toggleAI) {
             //Debug.Log("run AI-----------------------------");
-            Debug.Log("--: " + MiniMaxAB(MainArray, 2, int.MinValue, int.MaxValue, turn) + ", bestMove: " + bestMove[0] + ", " + bestMove[1]);
-            //MiniMaxAB(MainArray, 2, int.MinValue, int.MaxValue, turn);
+            //Debug.Log("--: " + MiniMaxAB(MainArray, 3, int.MinValue, int.MaxValue, turn) + ", bestMove: " + bestMove[0] + ", " + bestMove[1]);
+            MiniMaxAB(MainArray, 3, int.MinValue, int.MaxValue, turn);
             textureSwap(getPosition(bestMove[0],bestMove[1]), turn);
             winCheck();
             toggleAI = false;
