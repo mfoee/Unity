@@ -1,0 +1,1 @@
+minimax_v1.2
